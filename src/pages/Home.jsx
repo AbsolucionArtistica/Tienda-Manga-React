@@ -6,7 +6,6 @@ function Home() {
 
     return (
         <div>
-            <NavLink to="/home">Volver a la página de inicio</NavLink>
             <header class="text-white text-center py-5 main-color">
                 <div class="container">
                     <h1 class="display-4">Bienvenido a MangoManga</h1>
@@ -15,7 +14,6 @@ function Home() {
                 </div>
             </header>
             <Carrusel />
-            <Footer />
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         </div>
     );
