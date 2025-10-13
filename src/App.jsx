@@ -2,19 +2,26 @@ import { BrowserRouter } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
+import Tienda from './pages/Tienda'
 import styles from './styles/main.css'
 import Footer from './components/Footer'
+import { CarritoProvider } from './context/CarritoContext'
+import CarritoLateral from './components/CarritoLateral'
 
 function App() {
 
   return (
-    <BrowserRouter>
-      <Navbar />
-      <Routes>
-        <Route path='' element={<Home />} />
-      </Routes>
-      <Footer />
-    </BrowserRouter>
+    <CarritoProvider>
+      <BrowserRouter>
+        <Navbar />
+        <Routes>
+          <Route path='' element={<Home />} />
+          <Route path='/tienda' element={<Tienda />} />
+        </Routes>
+        <Footer />
+        <CarritoLateral />
+      </BrowserRouter>
+    </CarritoProvider>
   )
 }
 
