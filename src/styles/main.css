@@ -1,5 +1,5 @@
 .main-color {
-    background: #BF0426;
+  background: #bf0426;
 }
 
 .product-img {
@@ -10,31 +10,31 @@
 
 #productosCarousel .carousel-control-prev,
 #productosCarousel .carousel-control-next {
-  width: 40px;           /* Tamaño cuadrado fijo */
+  width: 40px; /* Tamaño cuadrado fijo */
   height: 40px;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0,0,0,0.3);
-  border-radius: 0;      /* Sin bordes redondeados */
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0; /* Sin bordes redondeados */
   z-index: 10;
-  display: flex;         /* Para centrar el icono */
+  display: flex; /* Para centrar el icono */
   align-items: center;
   justify-content: center;
-  font-size: 24px;       /* Tamaño del icono */
+  font-size: 24px; /* Tamaño del icono */
 }
 
 #productosCarousel .carousel-control-prev {
-  left: -50px;           /* Más separado a la izquierda */
+  left: -50px; /* Más separado a la izquierda */
 }
 
 #productosCarousel .carousel-control-next {
-  right: -50px;          /* Más separado a la derecha */
+  right: -50px; /* Más separado a la derecha */
 }
 
 .product-card {
   position: relative;
   overflow: hidden;
-  transition: max-height 0.4s ease, padding 0.4s ease;
+  transition: max-height 0.4s ease, padding 0.4s ease, transform 0.3s ease, box-shadow 0.3s ease;
   max-height: 380px; /* altura normal, ajusta según tu card */
   cursor: pointer;
 }
@@ -50,6 +50,8 @@
 .product-card:focus-within {
   max-height: 450px; /* aumenta la altura para mostrar más info */
   padding-bottom: 1rem;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
 }
 
 .product-card:hover .extra-info,
@@ -57,4 +59,202 @@
   max-height: 100px;
   opacity: 1;
   margin-top: 0.5rem;
+}
+
+/* Estilos adicionales para la tienda */
+.btn-danger {
+  background-color: #bf0426;
+  border-color: #bf0426;
+}
+
+.btn-danger:hover {
+  background-color: #9e0320;
+  border-color: #9e0320;
+}
+
+.btn-outline-danger {
+  color: #bf0426;
+  border-color: #bf0426;
+}
+
+.btn-outline-danger:hover {
+  background-color: #bf0426;
+  border-color: #bf0426;
+  color: white;
+}
+
+.text-danger {
+  color: #bf0426 !important;
+}
+
+.pagination .page-link {
+  color: #bf0426;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #bf0426;
+  border-color: #bf0426;
+}
+
+.pagination .page-link:hover {
+  color: #9e0320;
+}
+
+.input-group-text {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+}
+
+.card {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.badge.bg-warning {
+  background-color: #ffc107 !important;
+}
+
+/* Spinner personalizado */
+.spinner-border.text-danger {
+  color: #bf0426 !important;
+}
+
+/* Responsive ajustments */
+@media (max-width: 768px) {
+  .product-card {
+    max-height: none;
+  }
+
+  .product-card .extra-info {
+    max-height: none;
+    opacity: 1;
+    margin-top: 0.5rem;
+  }
+
+  .display-4 {
+    font-size: 2rem;
+  }
+}
+
+/* Animación para loading */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.product-card {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Estilos para el carrito */
+.carrito-lateral {
+  transition: transform 0.3s ease-in-out;
+}
+
+.carrito-lateral.open {
+  transform: translateX(0);
+}
+
+.carrito-lateral.closed {
+  transform: translateX(100%);
+}
+
+/* Botón flotante del carrito */
+.btn-carrito-flotante {
+  box-shadow: 0 4px 12px rgba(191, 4, 38, 0.4);
+  transition: all 0.3s ease;
+}
+
+.btn-carrito-flotante:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(191, 4, 38, 0.6);
+}
+
+/* Animación del contador del carrito */
+.badge {
+  animation: pulse 0.6s ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Estilos para los items del carrito */
+.carrito-item {
+  transition: all 0.3s ease;
+}
+
+.carrito-item:hover {
+  background-color: #f8f9fa;
+}
+
+/* Overlay del carrito */
+.carrito-overlay {
+  backdrop-filter: blur(2px);
+}
+
+/* Responsive para el carrito */
+@media (max-width: 768px) {
+  .carrito-lateral {
+    width: 100% !important;
+  }
+}
+
+/* Diseño de la página de login */
+.login-page {
+  background: radial-gradient(circle at top left, rgba(191, 4, 38, 0.85), rgba(33, 37, 41, 0.95));
+  min-height: calc(100vh - 150px);
+}
+
+.login-copy {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(6px);
+}
+
+.login-card {
+  border-radius: 16px;
+}
+
+.login-icon {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  color: #ffc107;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.login-policy {
+  background-color: #f8f9fa;
+  border: 1px dashed rgba(191, 4, 38, 0.3);
+}
+
+@media (max-width: 992px) {
+  .login-page {
+    padding-top: 3rem !important;
+  }
+
+  .login-copy {
+    text-align: center;
+  }
 }
