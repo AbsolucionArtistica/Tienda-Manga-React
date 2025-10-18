@@ -66,16 +66,15 @@ const CarritoLateral = () => {
       )}
 
       {/* Panel lateral del carrito */}
-      <div
-        className={`position-fixed top-0 end-0 h-100 bg-white shadow-lg transition-transform ${
-          isOpen ? 'translate-x-0' : 'translate-x-100'
-        }`}
-        style={{
-          width: '400px',
-          zIndex: 1060,
-          transition: 'transform 0.3s ease-in-out'
-        }}
-      >
+      {isOpen && (
+        <div
+          className={`position-fixed top-0 end-0 h-100 bg-white shadow-lg transition-transform`}
+          style={{
+            width: '400px',
+            zIndex: 1060,
+            transition: 'transform 0.3s ease-in-out'
+          }}
+        >
         {/* Header del carrito */}
         <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
           <h5 className="mb-0">
@@ -171,7 +170,8 @@ const CarritoLateral = () => {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      )}
     </>
   )
 }
