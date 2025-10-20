@@ -1,6 +1,6 @@
+import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import { obtenerMangaPorId, formatearPrecio } from '../data/mangas'
+import { obtenerMangas, formatearPrecio } from '../data/mangas'
 import { useCarrito } from '../context/CarritoContext'
 
 const Producto = () => {
@@ -10,19 +10,39 @@ const Producto = () => {
   const { agregarAlCarrito } = useCarrito()
 
   useEffect(() => {
-    setCargando(true)
-    const p = obtenerMangaPorId(id)
-    setProducto(p || null)
-    setCargando(false)
+    let mounted = true
+
+    const cargar = async () => {
+      setCargando(true)
+      try {
+        const listado = await obtenerMangas()
+        if (!mounted) return
+        const encontrado = listado.find(p => String(p.id) === String(id)) || null
+        setProducto(encontrado)
+      } catch (err) {
+        console.error('Error cargando mangas:', err)
+        if (mounted) setProducto(null)
+      } finally {
+        if (mounted) setCargando(false)
+      }
+    }
+
+    cargar()
+    return () => { mounted = false }
   }, [id])
 
   if (cargando) return <div className="container py-5 text-center">Cargando...</div>
-  if (!producto) return (
-    <div className="container py-5 text-center">
-      <h3>Producto no encontrado</h3>
-      <Link to="/tienda" className="btn btn-primary mt-3">Volver a la tienda</Link>
-    </div>
-  )
+
+  if (!producto) {
+    return (
+      <div className="container py-5 text-center">
+        <h3>Producto no encontrado</h3>
+        <Link to="/tienda" className="btn btn-primary mt-3">Volver a la tienda</Link>
+      </div>
+    )
+  }
+
+  const formatearPrecio = (n) => (typeof n !== 'undefined' ? `$${Number(n).toFixed(2)}` : '')
 
   return (
     <main className="container py-5">
