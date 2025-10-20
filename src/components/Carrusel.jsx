@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRef } from 'react'
 import { obtenerMangas, formatearPrecio } from '../data/mangas'
+import { Link } from 'react-router-dom'
 
 const Carrusel = ({ itemsPerSlide = 4 }) => {
   const [mangas, setMangas] = useState([])
@@ -116,9 +117,12 @@ const Carrusel = ({ itemsPerSlide = 4 }) => {
                       <p className="text-muted small mb-2">{producto.autor}</p>
                       <div className="mt-auto d-flex justify-content-between align-items-center">
                         <span className="text-danger fw-bold">{formatearPrecio(producto.precio)}</span>
-                        <button className="btn btn-sm btn-outline-danger" disabled={producto.stock === 0}>
+                        <Link
+                          to={`/producto/${producto.id}`}
+                          className={`btn btn-sm ${producto.stock === 0 ? 'btn-secondary disabled' : 'btn-outline-danger'}`}
+                        >
                           {producto.stock === 0 ? 'Agotado' : 'Ver'}
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   </div>

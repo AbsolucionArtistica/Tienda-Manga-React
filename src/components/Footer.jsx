@@ -1,14 +1,13 @@
-function Footer() {
+import React from 'react'
 
-    return (
-        <footer className="bg-dark text-white text-center py-4">
-            <div className="container">
-                <p className="mb-0">© 2025 MiTienda. Todos los derechos reservados.</p>
-            </div>
-        </footer>
-    );
-}
+const Footer = () => (
+  <footer className="bg-dark text-white text-center py-4">
+    <div className="container">
+      <p className="mb-0">© 2025 MiTienda. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+)
 
-export default Footer;
+export default Footer
 
 

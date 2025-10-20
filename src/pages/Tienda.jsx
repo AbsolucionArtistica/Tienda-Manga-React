@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { obtenerMangas, categorias, formatearPrecio } from '../data/mangas'
 import { useCarrito } from '../context/CarritoContext'
+import { Link } from 'react-router-dom'
 
 const Tienda = () => {
   // Estado para manejar los productos y filtros
@@ -10,10 +11,10 @@ const Tienda = () => {
   const [terminoBusqueda, setTerminoBusqueda] = useState('')
   const [paginaActual, setPaginaActual] = useState(1)
   const [cargando, setCargando] = useState(true)
-  
+
   // Hook del carrito
   const { agregarAlCarrito } = useCarrito()
-  
+
   const productosPorPagina = 12
 
   // Simular carga de datos desde el archivo externo
@@ -30,7 +31,7 @@ const Tienda = () => {
         setCargando(false)
       }
     }
-    
+
     cargarProductos()
   }, [])
 
@@ -77,16 +78,24 @@ const Tienda = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const manejarAgregarAlCarrito = (producto) => {
+  const manejarAgregarAlCarrito = (e, producto) => {
+    e.preventDefault()
     agregarAlCarrito(producto)
-    // Mostrar una notificación temporal
-    const button = event.target
-    const textoOriginal = button.innerHTML
-    button.innerHTML = '<i class="fas fa-check me-1"></i>¡Agregado!'
+
+    const button = e.currentTarget
+    const originalHTML = button.innerHTML
+
+    // Crear <i> con clases sin inyectar string HTML
+    const icon = document.createElement('i')
+    icon.className = 'fas fa-check me-1'
+
+    // Actualizar botón de forma segura
+    button.textContent = '¡Agregado!'
+    button.prepend(icon)
     button.disabled = true
-    
+
     setTimeout(() => {
-      button.innerHTML = textoOriginal
+      button.innerHTML = originalHTML
       button.disabled = producto.stock === 0
     }, 1500)
   }
@@ -195,65 +204,27 @@ const Tienda = () => {
           </div>
         ) : (
           productosActuales.map(producto => (
-            <div key={producto.id} className="col-lg-3 col-md-4 col-sm-6 mb-4">
-              <div className="card h-100 product-card border-0 shadow-sm">
-                <div className="position-relative">
+            <div key={producto.id} className="col-12 col-sm-6 col-md-3 mb-3">
+              <div className="card h-100 shadow-sm border-0">
+                <Link to={`/producto/${producto.id}`}>
                   <img
                     src={producto.imagen}
-                    className="card-img-top product-img"
+                    className="card-img-top"
                     alt={producto.nombre}
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/300x400/cccccc/666666?text=Manga'
-                    }}
+                    style={{ height: 260, objectFit: 'cover' }}
+                    onError={(e) => { e.target.src = 'https://via.placeholder.com/300x400?text=Manga' }}
                   />
-                  {producto.stock <= 5 && (
-                    <span className="position-absolute top-0 end-0 badge bg-warning m-2">
-                      ¡Últimas {producto.stock}!
-                    </span>
-                  )}
-                </div>
-                
+                </Link>
                 <div className="card-body d-flex flex-column">
-                  <h6 className="card-title fw-bold">{producto.nombre}</h6>
-                  <p className="card-text text-muted small mb-1">
-                    <i className="fas fa-user me-1"></i>
-                    {producto.autor}
-                  </p>
-                  <p className="card-text text-muted small mb-2">
-                    <i className="fas fa-tag me-1"></i>
-                    {producto.categoria}
-                  </p>
-                  
-                  <div className="mb-2">
-                    {renderizarEstrellasRating(producto.rating)}
-                    <span className="text-muted small ms-1">({producto.rating})</span>
-                  </div>
-
-                  <div className="extra-info">
-                    <p className="card-text small text-muted mb-1">
-                      <i className="fas fa-building me-1"></i>
-                      {producto.editorial}
-                    </p>
-                    <p className="card-text small">{producto.descripcion}</p>
-                  </div>
-
-                  <div className="mt-auto">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <span className="h5 mb-0 text-danger fw-bold">
-                        {formatearPrecio(producto.precio)}
-                      </span>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => manejarAgregarAlCarrito(producto)}
-                        disabled={producto.stock === 0}
-                      >
-                        {producto.stock === 0 ? (
-                          <><i className="fas fa-times me-1"></i>Agotado</>
-                        ) : (
-                          <><i className="fas fa-cart-plus me-1"></i>Agregar</>
-                        )}
-                      </button>
-                    </div>
+                  <Link to={`/producto/${producto.id}`} className="text-decoration-none">
+                    <h6 className="card-title mb-1">{producto.nombre}</h6>
+                  </Link>
+                  <p className="text-muted small mb-2">{producto.autor}</p>
+                  <div className="mt-auto d-flex justify-content-between align-items-center">
+                    <span className="text-danger fw-bold">{formatearPrecio(producto.precio)}</span>
+                    <Link to={`/producto/${producto.id}`} className="btn btn-sm btn-outline-danger">
+                      Ver
+                    </Link>
                   </div>
                 </div>
               </div>
