@@ -249,6 +249,11 @@
   border: 1px dashed rgba(191, 4, 38, 0.3);
 }
 
+.perfil-page {
+  min-height: calc(100vh - 150px);
+  background: linear-gradient(135deg, rgba(248, 249, 250, 0.95), rgba(233, 236, 239, 0.9));
+}
+
 @media (max-width: 992px) {
   .login-page {
     padding-top: 3rem !important;
