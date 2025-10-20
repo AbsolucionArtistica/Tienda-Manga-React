@@ -14,10 +14,12 @@ function App() {
     <CarritoProvider>
       <BrowserRouter>
         <Navbar />
-        <Routes>
-          <Route path='' element={<Home />} />
-          <Route path='/tienda' element={<Tienda />} />
-        </Routes>
+        <main className="page-content">
+          <Routes>
+            <Route path='' element={<Home />} />
+            <Route path='/tienda' element={<Tienda />} />
+          </Routes>
+        </main>
         <Footer />
         <CarritoLateral />
       </BrowserRouter>
