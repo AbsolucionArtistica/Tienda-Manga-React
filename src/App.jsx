@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
 import Tienda from './pages/Tienda'
 import Producto from './pages/Producto'
+import Checkout from './pages/Checkout'
 import './styles/main.css'
 import Footer from './components/Footer'
 import { CarritoProvider } from './context/CarritoContext'
@@ -19,6 +20,7 @@ function App() {
           <Route path='' element={<Home />} />
           <Route path='/tienda' element={<Tienda />} />
           <Route path='/producto/:id' element={<Producto />} />
+          <Route path='/checkout' element={<Checkout />} />
         </Routes>
         <Footer />
         <CarritoLateral />
