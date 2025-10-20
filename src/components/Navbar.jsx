@@ -1,8 +1,9 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCarrito } from '../context/CarritoContext';
 
 function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { cantidadTotal, abrirCarrito } = useCarrito();
 
   return (
@@ -55,9 +56,13 @@ function Navbar() {
               </button>
             </li>
             <li className="nav-item">
-              <Link
-                className={`nav-link ${location.pathname === '/login' ? 'active' : ''}`}
-                to="/login"
+              <button
+                type="button"
+                className={`nav-link btn btn-link p-0 ${
+                  location.pathname === '/login' ? 'active' : ''
+                }`}
+                onClick={() => navigate('/login')}
+                aria-label="Ir a iniciar sesión"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -73,7 +78,7 @@ function Navbar() {
                     d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"
                   />
                 </svg>
-              </Link>
+              </button>
             </li>
           </ul>
         </div>
