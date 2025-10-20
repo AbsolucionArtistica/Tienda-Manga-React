@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect } from 'react'
+import { createContext, useContext, useReducer, useEffect, useState } from 'react'
 
 // Crear el contexto
 const CarritoContext = createContext()
@@ -48,6 +48,7 @@ const carritoReducer = (state, action) => {
 // Provider del contexto
 export const CarritoProvider = ({ children }) => {
   const [carrito, dispatch] = useReducer(carritoReducer, [])
+  const [isOpen, setIsOpen] = useState(false)
 
   // Cargar carrito desde localStorage al inicio
   useEffect(() => {
@@ -92,6 +93,16 @@ export const CarritoProvider = ({ children }) => {
     cantidadTotal,
     precioTotal
   }
+
+  // funciones para controlar la apertura del carrito lateral
+  const abrirCarrito = () => setIsOpen(true)
+  const cerrarCarrito = () => setIsOpen(false)
+  const toggleCarrito = () => setIsOpen(v => !v)
+
+  value.isOpen = isOpen
+  value.abrirCarrito = abrirCarrito
+  value.cerrarCarrito = cerrarCarrito
+  value.toggleCarrito = toggleCarrito
 
   return (
     <CarritoContext.Provider value={value}>

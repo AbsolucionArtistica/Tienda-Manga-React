@@ -1,21 +1,18 @@
-import { useState } from 'react'
 import { useCarrito } from '../context/CarritoContext'
 import { formatearPrecio } from '../data/mangas'
 
 const CarritoLateral = () => {
-  const [isOpen, setIsOpen] = useState(false)
   const { 
     carrito, 
     cantidadTotal, 
     precioTotal, 
     actualizarCantidad, 
     eliminarDelCarrito, 
-    vaciarCarrito 
+    vaciarCarrito,
+    isOpen,
+    toggleCarrito,
+    cerrarCarrito
   } = useCarrito()
-
-  const toggleCarrito = () => {
-    setIsOpen(!isOpen)
-  }
 
   const finalizarCompra = () => {
     if (carrito.length === 0) {
@@ -31,37 +28,13 @@ const CarritoLateral = () => {
 
   return (
     <>
-      {/* Botón flotante del carrito */}
-      <button
-        className="btn btn-danger position-fixed"
-        style={{
-          bottom: '20px',
-          right: '20px',
-          borderRadius: '50%',
-          width: '60px',
-          height: '60px',
-          zIndex: 1050,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-        }}
-        onClick={toggleCarrito}
-      >
-        <i className="fas fa-shopping-cart"></i>
-        {cantidadTotal > 0 && (
-          <span 
-            className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark"
-            style={{ fontSize: '12px' }}
-          >
-            {cantidadTotal}
-          </span>
-        )}
-      </button>
 
       {/* Overlay */}
       {isOpen && (
         <div 
           className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50"
           style={{ zIndex: 1055 }}
-          onClick={toggleCarrito}
+          onClick={cerrarCarrito}
         />
       )}
 
@@ -107,7 +80,8 @@ const CarritoLateral = () => {
                     className="rounded"
                     style={{ width: '50px', height: '60px', objectFit: 'cover' }}
                     onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/50x60/cccccc/666666?text=Manga'
+            // usar la función del contexto para cerrar el carrito lateral
+            cerrarCarrito()
                     }}
                   />
                   <div className="flex-grow-1 ms-3">

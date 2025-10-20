@@ -42,8 +42,6 @@ const Producto = () => {
     )
   }
 
-  const formatearPrecio = (n) => (typeof n !== 'undefined' ? `$${Number(n).toFixed(2)}` : '')
-
   return (
     <main className="container py-5">
       <div className="row">

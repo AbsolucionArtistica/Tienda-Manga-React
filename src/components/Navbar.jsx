@@ -3,7 +3,7 @@ import { useCarrito } from '../context/CarritoContext'
 
 function Navbar() {
     const location = useLocation()
-    const { cantidadTotal } = useCarrito()
+    const { cantidadTotal, abrirCarrito } = useCarrito()
 
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -32,14 +32,14 @@ function Navbar() {
                         </li>
                         <li className="nav-item"><a className="nav-link" href="pages/contacto.html">Contacto</a></li>
                         <li className="nav-item">
-                            <span className="nav-link position-relative">
+                            <button type="button" className="nav-link btn btn-link position-relative text-white" onClick={() => abrirCarrito()} style={{ textDecoration: 'none' }}>
                                 <i className="fas fa-shopping-cart"></i>
                                 {cantidadTotal > 0 && (
                                     <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                         {cantidadTotal}
                                     </span>
                                 )}
-                            </span>
+                            </button>
                         </li>
                         <li className="nav-item"><a className="nav-link" href="pages/cuenta.html">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
