@@ -226,6 +226,12 @@
   backdrop-filter: blur(6px);
 }
 
+.login-copy.bg-light {
+  background: #f8f9fa;
+  border: 1px solid rgba(191, 4, 38, 0.1);
+  backdrop-filter: none;
+}
+
 .login-card {
   border-radius: 16px;
 }
