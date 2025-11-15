@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { obtenerMangas, formatearPrecio } from '../data/mangas'
-import { buscarMangaPorTitulo } from '../services/mangahook'
+import { obtenerMangaPorId } from '../services/animeapi'
 import { useCarrito } from '../context/CarritoContext'
 
 const Producto = () => {
@@ -16,28 +16,22 @@ const Producto = () => {
     const cargar = async () => {
       setCargando(true)
       try {
+        // Intentar obtener de la API primero
+        try {
+          const mangaAPI = await obtenerMangaPorId(id)
+          if (mangaAPI && mounted) {
+            setProducto(mangaAPI)
+            return
+          }
+        } catch (errorAPI) {
+          console.warn('No se pudo obtener de la API, usando datos locales:', errorAPI)
+        }
+
+        // Fallback: obtener de datos locales
         const listado = await obtenerMangas()
         if (!mounted) return
         const encontrado = listado.find(p => String(p.id) === String(id)) || null
         setProducto(encontrado)
-
-        // Intentar enriquecer los datos con la API externa (Manga Hook)
-        // Si la API no está configurada o falla, se usará el producto local.
-        try {
-          if (encontrado) {
-            const remote = await buscarMangaPorTitulo(encontrado.nombre)
-            if (remote && mounted) {
-              setProducto(prev => ({
-                ...prev,
-                imagen: remote.image || prev.imagen,
-                descripcion: remote.description || prev.descripcion
-              }))
-            }
-          }
-        } catch (err) {
-          // No impedir que la página cargue si falla la integración
-          console.warn('No se pudo enriquecer con MangaHook:', err)
-        }
       } catch (err) {
         console.error('Error cargando mangas:', err)
         if (mounted) setProducto(null)

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRef } from 'react'
 import { obtenerMangas, formatearPrecio } from '../data/mangas'
+import { obtenerMangasPopulares } from '../services/animeapi'
 import { Link } from 'react-router-dom'
 
 const Carrusel = ({ itemsPerSlide = 4 }) => {
@@ -13,6 +14,18 @@ const Carrusel = ({ itemsPerSlide = 4 }) => {
     const cargar = async () => {
       setCargando(true)
       try {
+        // Intentar obtener de la API primero
+        try {
+          const dataAPI = await obtenerMangasPopulares()
+          if (dataAPI && dataAPI.length > 0 && mounted) {
+            setMangas(dataAPI)
+            return
+          }
+        } catch (errorAPI) {
+          console.warn('No se pudo obtener de la API, usando datos locales:', errorAPI)
+        }
+
+        // Fallback: datos locales
         const data = await obtenerMangas()
         if (mounted) setMangas(data)
       } catch (e) {

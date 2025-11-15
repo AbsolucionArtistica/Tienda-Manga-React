@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { obtenerMangas, categorias, formatearPrecio } from '../data/mangas'
+import { buscarMangasPorTitulo, obtenerMangasPopulares } from '../services/animeapi'
 import { useCarrito } from '../context/CarritoContext'
 import { Link } from 'react-router-dom'
 
@@ -22,6 +23,19 @@ const Tienda = () => {
     const cargarProductos = async () => {
       setCargando(true)
       try {
+        // Intentar obtener de la API
+        try {
+          const mangasAPI = await obtenerMangasPopulares()
+          if (mangasAPI && mangasAPI.length > 0) {
+            setProductos(mangasAPI)
+            setProductosFiltrados(mangasAPI)
+            return
+          }
+        } catch (errorAPI) {
+          console.warn('No se pudo obtener de la API, usando datos locales:', errorAPI)
+        }
+
+        // Fallback: datos locales
         const mangasObtenidos = await obtenerMangas()
         setProductos(mangasObtenidos)
         setProductosFiltrados(mangasObtenidos)
@@ -37,25 +51,44 @@ const Tienda = () => {
 
   // Filtrar productos por categoría y búsqueda
   useEffect(() => {
-    let productosFiltrados = productos
+    const filtrar = async () => {
+      let productosFiltrados = productos
 
-    // Filtrar por categoría
-    if (categoriaActiva !== 'Todos') {
-      productosFiltrados = productosFiltrados.filter(
-        producto => producto.categoria === categoriaActiva
-      )
+      // Si hay término de búsqueda, intentar buscar en la API
+      if (terminoBusqueda) {
+        try {
+          const resultadosBusqueda = await buscarMangasPorTitulo(terminoBusqueda)
+          if (resultadosBusqueda && resultadosBusqueda.length > 0) {
+            productosFiltrados = resultadosBusqueda
+          } else {
+            // Si la API no devuelve resultados, filtrar locales
+            productosFiltrados = productos.filter(producto =>
+              producto.nombre.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
+              producto.autor.toLowerCase().includes(terminoBusqueda.toLowerCase())
+            )
+          }
+        } catch (error) {
+          console.warn('Error en búsqueda de API, usando filtro local:', error)
+          // Filtrar localmente si la API falla
+          productosFiltrados = productos.filter(producto =>
+            producto.nombre.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
+            producto.autor.toLowerCase().includes(terminoBusqueda.toLowerCase())
+          )
+        }
+      } else {
+        // Filtrar por categoría si no hay búsqueda
+        if (categoriaActiva !== 'Todos') {
+          productosFiltrados = productosFiltrados.filter(
+            producto => producto.categoria === categoriaActiva
+          )
+        }
+      }
+
+      setProductosFiltrados(productosFiltrados)
+      setPaginaActual(1)
     }
 
-    // Filtrar por término de búsqueda
-    if (terminoBusqueda) {
-      productosFiltrados = productosFiltrados.filter(producto =>
-        producto.nombre.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
-        producto.autor.toLowerCase().includes(terminoBusqueda.toLowerCase())
-      )
-    }
-
-    setProductosFiltrados(productosFiltrados)
-    setPaginaActual(1) // Resetear a la primera página cuando se filtra
+    filtrar()
   }, [productos, categoriaActiva, terminoBusqueda])
 
   // Calcular productos para la página actual
