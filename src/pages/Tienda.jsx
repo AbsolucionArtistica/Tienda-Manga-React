@@ -1,14 +1,30 @@
 import { useState, useEffect } from 'react'
 import { obtenerMangas, categorias, formatearPrecio } from '../data/mangas'
-import { buscarMangasPorTitulo, obtenerMangasPopulares } from '../services/animeapi'
+import { buscarMangasPorTitulo, obtenerMangasPopulares, obtenerMangasPorGenero } from '../services/animeapi'
 import { useCarrito } from '../context/CarritoContext'
 import { Link } from 'react-router-dom'
+
+// Géneros disponibles en Jikan API con sus IDs
+const generosAPI = [
+  { id: 'todos', nombre: 'Todos', jikanId: null },
+  { id: 'action', nombre: 'Acción', jikanId: 1 },
+  { id: 'adventure', nombre: 'Aventura', jikanId: 2 },
+  { id: 'comedy', nombre: 'Comedia', jikanId: 4 },
+  { id: 'drama', nombre: 'Drama', jikanId: 8 },
+  { id: 'fantasy', nombre: 'Fantasía', jikanId: 10 },
+  { id: 'horror', nombre: 'Horror', jikanId: 14 },
+  { id: 'romance', nombre: 'Romance', jikanId: 22 },
+  { id: 'scifi', nombre: 'Sci-Fi', jikanId: 24 },
+  { id: 'shoujo', nombre: 'Shoujo', jikanId: 25 },
+  { id: 'shounen', nombre: 'Shounen', jikanId: 27 },
+  { id: 'slice', nombre: 'Slice of Life', jikanId: 36 }
+]
 
 const Tienda = () => {
   // Estado para manejar los productos y filtros
   const [productos, setProductos] = useState([])
   const [productosFiltrados, setProductosFiltrados] = useState([])
-  const [categoriaActiva, setCategoriaActiva] = useState('Todos')
+  const [categoriaActiva, setCategoriaActiva] = useState('todos')
   const [terminoBusqueda, setTerminoBusqueda] = useState('')
   const [paginaActual, setPaginaActual] = useState(1)
   const [cargando, setCargando] = useState(true)
@@ -76,11 +92,22 @@ const Tienda = () => {
           )
         }
       } else {
-        // Filtrar por categoría si no hay búsqueda
-        if (categoriaActiva !== 'Todos') {
-          productosFiltrados = productosFiltrados.filter(
-            producto => producto.categoria === categoriaActiva
-          )
+        // Filtrar por género si no hay búsqueda
+        if (categoriaActiva !== 'todos') {
+          const generoSeleccionado = generosAPI.find(g => g.id === categoriaActiva)
+          if (generoSeleccionado && generoSeleccionado.jikanId) {
+            try {
+              productosFiltrados = await obtenerMangasPorGenero(generoSeleccionado.jikanId)
+            } catch (error) {
+              console.warn('Error filtrando por género de API:', error)
+              // Fallback: filtrar localmente por generos
+              productosFiltrados = productos.filter(producto =>
+                producto.generos?.some(g => 
+                  g.toLowerCase().includes(generoSeleccionado.nombre.toLowerCase())
+                )
+              )
+            }
+          }
         }
       }
 
@@ -184,15 +211,15 @@ const Tienda = () => {
       {/* Filtros y búsqueda */}
       <div className="row mb-4">
         <div className="col-md-8">
-          {/* Categorías */}
+          {/* Géneros */}
           <div className="d-flex flex-wrap gap-2 mb-3">
-            {categorias.map(categoria => (
+            {generosAPI.map(genero => (
               <button
-                key={categoria}
-                className={`btn ${categoriaActiva === categoria ? 'btn-danger' : 'btn-outline-danger'}`}
-                onClick={() => manejarCambioCategoria(categoria)}
+                key={genero.id}
+                className={`btn ${categoriaActiva === genero.id ? 'btn-danger' : 'btn-outline-danger'}`}
+                onClick={() => manejarCambioCategoria(genero.id)}
               >
-                {categoria}
+                {genero.nombre}
               </button>
             ))}
           </div>
@@ -219,7 +246,7 @@ const Tienda = () => {
         <div className="col-12">
           <p className="text-muted">
             Mostrando {productosActuales.length} de {productosFiltrados.length} productos
-            {categoriaActiva !== 'Todos' && ` en la categoría "${categoriaActiva}"`}
+            {categoriaActiva !== 'todos' && ` en la categoría "${generosAPI.find(g => g.id === categoriaActiva)?.nombre}"`}
             {terminoBusqueda && ` que coinciden con "${terminoBusqueda}"`}
           </p>
         </div>

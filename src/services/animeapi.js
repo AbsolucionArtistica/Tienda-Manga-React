@@ -117,13 +117,55 @@ export const obtenerMangasPopulares = async () => {
         precio: 12990,
         stock: 10,
         autor: manga.authors?.[0]?.name || 'Desconocido',
-        rating: manga.score || 4.5
+        rating: manga.score || 4.5,
+        generos: manga.genres?.map(g => g.name) || []
       }))
     }
 
     return []
   } catch (error) {
     console.error('Error obteniendo mangas populares de Jikan:', error)
+    throw error
+  }
+}
+
+/**
+ * Obtiene mangas filtrados por género
+ * @param {number} genreId - ID del género (ej: 1 para Action)
+ * @returns {Promise<Array>} Lista de mangas del género
+ */
+export const obtenerMangasPorGenero = async (genreId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/manga?genres=${genreId}&limit=25`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`Error en la API: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    if (data.data && data.data.length > 0) {
+      return data.data.map(manga => ({
+        id: manga.mal_id,
+        nombre: manga.title,
+        imagen: manga.images?.jpg?.image_url || 'https://via.placeholder.com/300x400?text=Manga',
+        descripcion: manga.synopsis || 'Manga disponible',
+        precio: 12990,
+        stock: 10,
+        autor: manga.authors?.[0]?.name || 'Desconocido',
+        rating: manga.score || 4.5,
+        generos: manga.genres?.map(g => g.name) || []
+      }))
+    }
+
+    return []
+  } catch (error) {
+    console.error('Error obteniendo mangas por género:', error)
     throw error
   }
 }
