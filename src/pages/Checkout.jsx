@@ -1,22 +1,69 @@
-import { useCarrito } from '../context/CarritoContext'
-import { formatearPrecio } from '../data/mangas'
-import { useState } from 'react'
+import { useState } from 'react';
+import { useCarrito } from '../context/CarritoContext';
+import { formatearPrecio } from '../data/mangas';
+
+const formatoExpiracion = /^(0[1-9]|1[0-2])\/\d{2}$/;
 
 const Checkout = () => {
-  const { carrito, precioTotal, cantidadTotal, vaciarCarrito } = useCarrito()
-  const [form, setForm] = useState({ nombre: '', email: '', direccion: '', tarjeta: '', expiracion: '', cvv: '' })
+  const { carrito, precioTotal, cantidadTotal, vaciarCarrito } = useCarrito();
+  const [form, setForm] = useState({
+    nombre: '',
+    email: '',
+    direccion: '',
+    tarjeta: '',
+    expiracion: '',
+    cvv: '',
+  });
+  const [errores, setErrores] = useState({});
+
+  const esTarjetaValida = (valor) => {
+    const limpia = valor.replace(/\s+/g, '');
+    return /^\d{16}$/.test(limpia);
+  };
+
+  const esExpiracionValida = (valor) => formatoExpiracion.test(valor);
+
+  const esCvvValido = (valor) => /^\d{3}$/.test(valor);
 
   const manejarCambio = (e) => {
-    const { name, value } = e.target
-    setForm(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
   const manejarSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
+    const nuevosErrores = {};
+
+    if (!esTarjetaValida(form.tarjeta)) {
+      nuevosErrores.tarjeta = 'La tarjeta debe tener 16 dígitos.';
+    }
+
+    if (!esExpiracionValida(form.expiracion)) {
+      nuevosErrores.expiracion = 'Usa el formato MM/AA y un mes válido.';
+    }
+
+    if (!esCvvValido(form.cvv)) {
+      nuevosErrores.cvv = 'El CVV debe tener 3 dígitos.';
+    }
+
+    if (carrito.length === 0) {
+      nuevosErrores.carrito = 'No puedes pagar sin productos en el carrito.';
+    }
+
+    if (Object.keys(nuevosErrores).length > 0) {
+      setErrores(nuevosErrores);
+      return;
+    }
+
+    setErrores({});
     // Aquí normalmente validas y envías a un backend/TPV
-    alert(`Gracias ${form.nombre}!\nPedido: ${cantidadTotal} productos.\nTotal: ${formatearPrecio(precioTotal)}`)
-    vaciarCarrito()
-  }
+    alert(
+      `Gracias ${form.nombre}!\nPedido: ${cantidadTotal} productos.\nTotal: ${formatearPrecio(
+        precioTotal
+      )}`
+    );
+    vaciarCarrito();
+  };
 
   return (
     <div className="container py-4">
@@ -25,14 +72,19 @@ const Checkout = () => {
         <div className="col-md-6">
           <h5>Productos</h5>
           {carrito.length === 0 ? (
-            <p>Tu carrito está vacío.</p>
+            <p className="text-danger">Tu carrito está vacío.</p>
           ) : (
             <ul className="list-group">
-              {carrito.map(item => (
-                <li key={item.id} className="list-group-item d-flex justify-content-between align-items-center">
+              {carrito.map((item) => (
+                <li
+                  key={item.id}
+                  className="list-group-item d-flex justify-content-between align-items-center"
+                >
                   <div>
                     <strong>{item.nombre}</strong>
-                    <div className="text-muted small">{item.cantidad} × {formatearPrecio(item.precio)}</div>
+                    <div className="text-muted small">
+                      {item.cantidad} × {formatearPrecio(item.precio)}
+                    </div>
                   </div>
                   <div>{formatearPrecio(item.precio * item.cantidad)}</div>
                 </li>
@@ -47,39 +99,104 @@ const Checkout = () => {
 
         <div className="col-md-6">
           <h5>Datos de pago</h5>
-          <form onSubmit={manejarSubmit}>
+          <form onSubmit={manejarSubmit} noValidate>
             <div className="mb-2">
-              <label className="form-label">Nombre completo</label>
-              <input name="nombre" value={form.nombre} onChange={manejarCambio} className="form-control" required />
+              <label className="form-label" htmlFor="checkout-nombre">
+                Nombre completo
+              </label>
+              <input
+                id="checkout-nombre"
+                name="nombre"
+                value={form.nombre}
+                onChange={manejarCambio}
+                className="form-control"
+                required
+              />
             </div>
             <div className="mb-2">
-              <label className="form-label">Email</label>
-              <input name="email" type="email" value={form.email} onChange={manejarCambio} className="form-control" required />
+              <label className="form-label" htmlFor="checkout-email">
+                Email
+              </label>
+              <input
+                id="checkout-email"
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={manejarCambio}
+                className="form-control"
+                required
+              />
             </div>
             <div className="mb-2">
-              <label className="form-label">Dirección</label>
-              <input name="direccion" value={form.direccion} onChange={manejarCambio} className="form-control" required />
+              <label className="form-label" htmlFor="checkout-direccion">
+                Dirección
+              </label>
+              <input
+                id="checkout-direccion"
+                name="direccion"
+                value={form.direccion}
+                onChange={manejarCambio}
+                className="form-control"
+                required
+              />
             </div>
             <div className="mb-2">
-              <label className="form-label">Número de tarjeta</label>
-              <input name="tarjeta" value={form.tarjeta} onChange={manejarCambio} className="form-control" required />
+              <label className="form-label" htmlFor="checkout-tarjeta">
+                Número de tarjeta
+              </label>
+              <input
+                id="checkout-tarjeta"
+                name="tarjeta"
+                value={form.tarjeta}
+                onChange={manejarCambio}
+                className={`form-control ${errores.tarjeta ? 'is-invalid' : ''}`}
+                maxLength={19}
+                placeholder="1234123412341234"
+                required
+              />
+              {errores.tarjeta && <div className="invalid-feedback">{errores.tarjeta}</div>}
             </div>
             <div className="row">
               <div className="col-6 mb-2">
-                <label className="form-label">Expiración</label>
-                <input name="expiracion" value={form.expiracion} onChange={manejarCambio} className="form-control" placeholder="MM/AA" required />
+                <label className="form-label" htmlFor="checkout-expiracion">
+                  Expiración
+                </label>
+                <input
+                  id="checkout-expiracion"
+                  name="expiracion"
+                  value={form.expiracion}
+                  onChange={manejarCambio}
+                  className={`form-control ${errores.expiracion ? 'is-invalid' : ''}`}
+                  placeholder="MM/AA"
+                  required
+                />
+                {errores.expiracion && <div className="invalid-feedback">{errores.expiracion}</div>}
               </div>
               <div className="col-6 mb-2">
-                <label className="form-label">CVV</label>
-                <input name="cvv" value={form.cvv} onChange={manejarCambio} className="form-control" required />
+                <label className="form-label" htmlFor="checkout-cvv">
+                  CVV
+                </label>
+                <input
+                  id="checkout-cvv"
+                  name="cvv"
+                  value={form.cvv}
+                  onChange={manejarCambio}
+                  className={`form-control ${errores.cvv ? 'is-invalid' : ''}`}
+                  maxLength={3}
+                  required
+                />
+                {errores.cvv && <div className="invalid-feedback">{errores.cvv}</div>}
               </div>
             </div>
-            <button className="btn btn-primary mt-2" type="submit">Pagar {formatearPrecio(precioTotal)}</button>
+            {errores.carrito && <p className="text-danger small mb-2">{errores.carrito}</p>}
+            <button className="btn btn-primary mt-2" type="submit">
+              Pagar {formatearPrecio(precioTotal)}
+            </button>
           </form>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Checkout
+export default Checkout;
