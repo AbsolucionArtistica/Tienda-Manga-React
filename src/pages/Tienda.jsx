@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { obtenerMangas, categorias, formatearPrecio } from '../data/mangas'
 import { buscarMangasPorTitulo, obtenerMangasPopulares, obtenerMangasPorGenero } from '../services/animeapi'
+import { getAllMangas } from '../services/mangaService'
 import { useCarrito } from '../context/CarritoContext'
 import { Link } from 'react-router-dom'
 
-// Géneros disponibles en Jikan API con sus IDs
 const generosAPI = [
   { id: 'todos', nombre: 'Todos', jikanId: null },
   { id: 'action', nombre: 'Acción', jikanId: 1 },
@@ -21,88 +21,86 @@ const generosAPI = [
 ]
 
 const Tienda = () => {
-  // Estado para manejar los productos y filtros
+  const { agregarAlCarrito } = useCarrito()
   const [productos, setProductos] = useState([])
   const [productosFiltrados, setProductosFiltrados] = useState([])
   const [categoriaActiva, setCategoriaActiva] = useState('todos')
   const [terminoBusqueda, setTerminoBusqueda] = useState('')
   const [paginaActual, setPaginaActual] = useState(1)
   const [cargando, setCargando] = useState(true)
+  const productosPorPagina = 8
 
-  // Hook del carrito
-  const { agregarAlCarrito } = useCarrito()
-
-  const productosPorPagina = 12
-
-  // Simular carga de datos desde el archivo externo
   useEffect(() => {
     const cargarProductos = async () => {
       setCargando(true)
       try {
-        // Intentar obtener de la API
         try {
-          const mangasAPI = await obtenerMangasPopulares()
-          if (mangasAPI && mangasAPI.length > 0) {
-            setProductos(mangasAPI)
-            setProductosFiltrados(mangasAPI)
+          const data = await getAllMangas()
+          if (data && data.length > 0) {
+            const mangasBackend = data.map(m => ({
+              id: m.id,
+              nombre: m.titulo,
+              autor: m.autor,
+              precio: m.precio,
+              stock: m.stock,
+              imagen: m.imagenUrl || 'https://via.placeholder.com/300x400?text=Manga',
+              descripcion: m.editorial || 'Sin descripción',
+              rating: 5,
+              generos: ['Shounen']
+            }))
+            setProductos(mangasBackend)
+            setProductosFiltrados(mangasBackend)
             return
           }
-        } catch (errorAPI) {
-          console.warn('No se pudo obtener de la API, usando datos locales:', errorAPI)
+        } catch (errorBackend) {
+          console.warn(errorBackend)
         }
 
-        // Fallback: datos locales
-        const mangasObtenidos = await obtenerMangas()
-        setProductos(mangasObtenidos)
-        setProductosFiltrados(mangasObtenidos)
+        const data = await obtenerMangasPopulares()
+        setProductos(data)
+        setProductosFiltrados(data)
       } catch (error) {
-        console.error('Error al cargar los mangas:', error)
+        console.error(error)
+        const dataLocal = obtenerMangas()
+        setProductos(dataLocal)
+        setProductosFiltrados(dataLocal)
       } finally {
         setCargando(false)
       }
     }
-
     cargarProductos()
   }, [])
 
-  // Filtrar productos por categoría y búsqueda
   useEffect(() => {
     const filtrar = async () => {
       let productosFiltrados = productos
 
-      // Si hay término de búsqueda, intentar buscar en la API
       if (terminoBusqueda) {
         try {
           const resultadosBusqueda = await buscarMangasPorTitulo(terminoBusqueda)
           if (resultadosBusqueda && resultadosBusqueda.length > 0) {
             productosFiltrados = resultadosBusqueda
           } else {
-            // Si la API no devuelve resultados, filtrar locales
             productosFiltrados = productos.filter(producto =>
               producto.nombre.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
               producto.autor.toLowerCase().includes(terminoBusqueda.toLowerCase())
             )
           }
         } catch (error) {
-          console.warn('Error en búsqueda de API, usando filtro local:', error)
-          // Filtrar localmente si la API falla
           productosFiltrados = productos.filter(producto =>
             producto.nombre.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
             producto.autor.toLowerCase().includes(terminoBusqueda.toLowerCase())
           )
         }
       } else {
-        // Filtrar por género si no hay búsqueda
         if (categoriaActiva !== 'todos') {
           const generoSeleccionado = generosAPI.find(g => g.id === categoriaActiva)
           if (generoSeleccionado && generoSeleccionado.jikanId) {
             try {
               productosFiltrados = await obtenerMangasPorGenero(generoSeleccionado.jikanId)
             } catch (error) {
-              console.warn('Error filtrando por género de API:', error)
-              // Fallback: filtrar localmente por generos
               productosFiltrados = productos.filter(producto =>
-                producto.generos?.some(g => 
+                producto.generos?.some(g =>
                   g.toLowerCase().includes(generoSeleccionado.nombre.toLowerCase())
                 )
               )
@@ -118,13 +116,11 @@ const Tienda = () => {
     filtrar()
   }, [productos, categoriaActiva, terminoBusqueda])
 
-  // Calcular productos para la página actual
   const indiceInicio = (paginaActual - 1) * productosPorPagina
   const indiceFin = indiceInicio + productosPorPagina
   const productosActuales = productosFiltrados.slice(indiceInicio, indiceFin)
   const totalPaginas = Math.ceil(productosFiltrados.length / productosPorPagina)
 
-  // Funciones de manejo
   const manejarCambioCategoria = (categoria) => {
     setCategoriaActiva(categoria)
   }
@@ -145,11 +141,9 @@ const Tienda = () => {
     const button = e.currentTarget
     const originalHTML = button.innerHTML
 
-    // Crear <i> con clases sin inyectar string HTML
     const icon = document.createElement('i')
     icon.className = 'fas fa-check me-1'
 
-    // Actualizar botón de forma segura
     button.textContent = '¡Agregado!'
     button.prepend(icon)
     button.disabled = true
@@ -158,27 +152,6 @@ const Tienda = () => {
       button.innerHTML = originalHTML
       button.disabled = producto.stock === 0
     }, 1500)
-  }
-
-  const renderizarEstrellasRating = (rating) => {
-    const estrellas = []
-    const estrellasCompletas = Math.floor(rating)
-    const tieneMediaEstrella = rating % 1 !== 0
-
-    for (let i = 0; i < estrellasCompletas; i++) {
-      estrellas.push(<span key={i} className="text-warning">★</span>)
-    }
-
-    if (tieneMediaEstrella) {
-      estrellas.push(<span key="half" className="text-warning">☆</span>)
-    }
-
-    const estrellasVacias = 5 - Math.ceil(rating)
-    for (let i = 0; i < estrellasVacias; i++) {
-      estrellas.push(<span key={`empty-${i}`} className="text-muted">☆</span>)
-    }
-
-    return estrellas
   }
 
   if (cargando) {
@@ -196,7 +169,6 @@ const Tienda = () => {
 
   return (
     <div className="container-fluid py-4">
-      {/* Header de la tienda */}
       <div className="row mb-4">
         <div className="col-12">
           <div className="text-center mb-4">
@@ -208,10 +180,8 @@ const Tienda = () => {
         </div>
       </div>
 
-      {/* Filtros y búsqueda */}
       <div className="row mb-4">
         <div className="col-md-8">
-          {/* Géneros */}
           <div className="d-flex flex-wrap gap-2 mb-3">
             {generosAPI.map(genero => (
               <button
@@ -225,7 +195,6 @@ const Tienda = () => {
           </div>
         </div>
         <div className="col-md-4">
-          {/* Búsqueda */}
           <div className="input-group">
             <input
               type="text"
@@ -241,7 +210,6 @@ const Tienda = () => {
         </div>
       </div>
 
-      {/* Información de resultados */}
       <div className="row mb-3">
         <div className="col-12">
           <p className="text-muted">
@@ -252,7 +220,6 @@ const Tienda = () => {
         </div>
       </div>
 
-      {/* Grid de productos */}
       <div className="row">
         {productosActuales.length === 0 ? (
           <div className="col-12 text-center py-5">
@@ -293,7 +260,6 @@ const Tienda = () => {
         )}
       </div>
 
-      {/* Paginación */}
       {totalPaginas > 1 && (
         <div className="row mt-4">
           <div className="col-12">
@@ -308,7 +274,7 @@ const Tienda = () => {
                     <i className="fas fa-chevron-left"></i>
                   </button>
                 </li>
-                
+
                 {[...Array(totalPaginas)].map((_, index) => {
                   const numeroPagina = index + 1
                   return (
@@ -322,7 +288,7 @@ const Tienda = () => {
                     </li>
                   )
                 })}
-                
+
                 <li className={`page-item ${paginaActual === totalPaginas ? 'disabled' : ''}`}>
                   <button
                     className="page-link"
