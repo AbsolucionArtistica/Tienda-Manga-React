@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function Registro() {
+  const navigate = useNavigate();
+  const { register } = useAuth();
   const [formulario, setFormulario] = useState({
     nombre: '',
     email: '',
@@ -18,10 +21,9 @@ function Registro() {
 
   const [errores, setErrores] = useState({});
   const [mensaje, setMensaje] = useState('');
+  const [enviando, setEnviando] = useState(false);
 
-  const manejarSubmit = (evento) => {
-    evento.preventDefault();
-
+  const validarFormulario = () => {
     const nuevosErrores = {};
 
     if (!formulario.nombre.trim()) {
@@ -41,14 +43,17 @@ function Registro() {
       nuevosErrores.confirmarPassword = 'Las contraseñas deben coincidir exactamente.';
     }
 
-    if (formulario.telefono && formulario.telefono.length < 8) {
-      nuevosErrores.telefono = 'Ingresa un teléfono de contacto válido.';
-    }
-
     if (!formulario.ciudad.trim()) {
       nuevosErrores.ciudad = 'Necesitamos una ciudad para estimar tiempos de envío.';
     }
 
+    return nuevosErrores;
+  };
+
+  const manejarSubmit = async (evento) => {
+    evento.preventDefault();
+
+    const nuevosErrores = validarFormulario();
     setErrores(nuevosErrores);
 
     if (Object.keys(nuevosErrores).length > 0) {
@@ -56,41 +61,32 @@ function Registro() {
       return;
     }
 
-    const usuariosGuardados = JSON.parse(localStorage.getItem('usuarios') || '[]');
-    const existeEmail = usuariosGuardados.some(
-      (usuario) => usuario.email.toLowerCase() === formulario.email.trim().toLowerCase()
-    );
+    setEnviando(true);
+    try {
+      const result = await register({
+        nombre: formulario.nombre.trim(),
+        email: formulario.email.trim(),
+        password: formulario.password,
+        telefono: formulario.telefono.trim(),
+        ciudad: formulario.ciudad.trim(),
+      });
 
-    if (existeEmail) {
-      setErrores({ email: 'Este correo ya está registrado, intenta iniciar sesión.' });
+      if (result.success) {
+        setMensaje('Cuenta creada con éxito. Redirigiendo a tu perfil...');
+        setErrores({});
+        setTimeout(() => {
+          navigate('/perfil');
+        }, 1500);
+      } else {
+        setErrores({ general: result.error || 'Error al crear la cuenta' });
+        setMensaje('');
+      }
+    } catch (error) {
+      setErrores({ general: error.message || 'Error al conectar con el servidor' });
       setMensaje('');
-      return;
+    } finally {
+      setEnviando(false);
     }
-
-    const nuevoUsuario = {
-      nombre: formulario.nombre.trim(),
-      email: formulario.email.trim(),
-      password: formulario.password,
-      telefono: formulario.telefono.trim(),
-      ciudad: formulario.ciudad.trim(),
-      actualizadoEl: new Date().toLocaleString(),
-      notificaciones: 'activas por defecto',
-    };
-
-    const usuariosActualizados = [...usuariosGuardados, nuevoUsuario];
-    localStorage.setItem('usuarios', JSON.stringify(usuariosActualizados));
-    localStorage.setItem('usuarioActivo', JSON.stringify(nuevoUsuario));
-
-    setMensaje('Cuenta creada con éxito. Ya puedes revisar tu perfil.');
-    setErrores({});
-    setFormulario({
-      nombre: '',
-      email: '',
-      password: '',
-      confirmarPassword: '',
-      telefono: '',
-      ciudad: '',
-    });
   };
 
   return (
@@ -126,6 +122,11 @@ function Registro() {
                     {mensaje}
                   </div>
                 )}
+                {errores.general && (
+                  <div className="alert alert-danger" role="alert">
+                    {errores.general}
+                  </div>
+                )}
                 <form onSubmit={manejarSubmit} className="login-form" noValidate>
                   <div className="mb-3">
                     <label htmlFor="registroNombre" className="form-label text-muted">
@@ -139,6 +140,7 @@ function Registro() {
                       value={formulario.nombre}
                       onChange={manejarCambio}
                       placeholder="Ej: Hikaru Nakamura"
+                      disabled={enviando}
                     />
                     {errores.nombre && (
                       <div className="form-text text-danger">{errores.nombre}</div>
@@ -156,6 +158,7 @@ function Registro() {
                       value={formulario.email}
                       onChange={manejarCambio}
                       placeholder="usuario@mangomanga.cl"
+                      disabled={enviando}
                     />
                     {errores.email && <div className="form-text text-danger">{errores.email}</div>}
                   </div>
@@ -172,6 +175,7 @@ function Registro() {
                         value={formulario.password}
                         onChange={manejarCambio}
                         placeholder="••••••••"
+                        disabled={enviando}
                       />
                       {errores.password && (
                         <div className="form-text text-danger">{errores.password}</div>
@@ -189,6 +193,7 @@ function Registro() {
                         value={formulario.confirmarPassword}
                         onChange={manejarCambio}
                         placeholder="••••••••"
+                        disabled={enviando}
                       />
                       {errores.confirmarPassword && (
                         <div className="form-text text-danger">{errores.confirmarPassword}</div>
@@ -198,7 +203,7 @@ function Registro() {
                   <div className="row g-3 mt-1">
                     <div className="col-md-6">
                       <label htmlFor="registroTelefono" className="form-label text-muted">
-                        Teléfono de contacto
+                        Teléfono de contacto (opcional)
                       </label>
                       <input
                         type="tel"
@@ -208,6 +213,7 @@ function Registro() {
                         value={formulario.telefono}
                         onChange={manejarCambio}
                         placeholder="Ej: +56 9 1234 5678"
+                        disabled={enviando}
                       />
                       {errores.telefono && (
                         <div className="form-text text-danger">{errores.telefono}</div>
@@ -225,14 +231,15 @@ function Registro() {
                         value={formulario.ciudad}
                         onChange={manejarCambio}
                         placeholder="Ej: Santiago"
+                        disabled={enviando}
                       />
                       {errores.ciudad && (
                         <div className="form-text text-danger">{errores.ciudad}</div>
                       )}
                     </div>
                   </div>
-                  <button type="submit" className="btn btn-danger w-100 btn-lg mt-4">
-                    Crear cuenta
+                  <button type="submit" className="btn btn-danger w-100 btn-lg mt-4" disabled={enviando}>
+                    {enviando ? 'Creando cuenta...' : 'Crear cuenta'}
                   </button>
                 </form>
                 <div className="text-center mt-4">

@@ -1,16 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import LoadingSpinner from '../components/LoadingSpinner';
+import ErrorAlert from '../components/ErrorAlert';
 
 function Login() {
   const navigate = useNavigate();
+  const { login, isAuthenticated, loading } = useAuth();
   const [credenciales, setCredenciales] = useState({ email: '', password: '' });
   const [errores, setErrores] = useState({ email: '', password: '', general: '' });
   const [mensajeExito, setMensajeExito] = useState('');
+  const [enviando, setEnviando] = useState(false);
 
   useEffect(() => {
-    setMensajeExito('');
-    setErrores({ email: '', password: '', general: '' });
-  }, []);
+    // Redirigir si ya está autenticado
+    if (isAuthenticated) {
+      navigate('/perfil');
+    }
+  }, [isAuthenticated, navigate]);
 
   const manejarCambio = (evento) => {
     const { name, value } = evento.target;
@@ -23,7 +30,7 @@ function Login() {
     const nuevosErrores = { email: '', password: '', general: '' };
 
     if (!credenciales.email.trim()) {
-      nuevosErrores.email = 'Debes ingresar un correo registrado.';
+      nuevosErrores.email = 'Debes ingresar un correo.';
     }
 
     if (!credenciales.password.trim()) {
@@ -35,47 +42,38 @@ function Login() {
       return false;
     }
 
-    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-    const usuarioEncontrado = usuarios.find(
-      (usuario) => usuario.email === credenciales.email.trim()
-    );
-
-    if (!usuarioEncontrado) {
-      setErrores({ ...nuevosErrores, general: 'No encontramos una cuenta con ese correo.' });
-      return false;
-    }
-
-    if (usuarioEncontrado.password !== credenciales.password) {
-      setErrores({ ...nuevosErrores, general: 'La contraseña ingresada no coincide.' });
-      return false;
-    }
-
-    return usuarioEncontrado;
+    return true;
   };
 
-  const manejarSubmit = (evento) => {
+  const manejarSubmit = async (evento) => {
     evento.preventDefault();
-    const usuarioValido = validarFormulario();
-    if (!usuarioValido) {
-      setMensajeExito('');
+    
+    if (!validarFormulario()) {
       return;
     }
 
-    const usuarioPersistido = {
-      nombre: usuarioValido.nombre,
-      email: usuarioValido.email,
-      telefono: usuarioValido.telefono || '',
-      ciudad: usuarioValido.ciudad || '',
-      actualizadoEl: new Date().toLocaleString(),
-      notificaciones: usuarioValido.notificaciones || 'activas por defecto',
-    };
-
-    localStorage.setItem('usuarioActivo', JSON.stringify(usuarioPersistido));
-    setMensajeExito('Ingreso correcto. Redirigiendo a tu perfil...');
-
-    setTimeout(() => {
-      navigate('/perfil');
-    }, 1200);
+    setEnviando(true);
+    try {
+      const result = await login(credenciales.email, credenciales.password);
+      if (result.success) {
+        setMensajeExito('Ingreso correcto. Redirigiendo a tu perfil...');
+        setTimeout(() => {
+          navigate('/perfil');
+        }, 1200);
+      } else {
+        setErrores({
+          ...errores,
+          general: result.error || 'Error en login'
+        });
+      }
+    } catch (error) {
+      setErrores({
+        ...errores,
+        general: error.message || 'Error al conectar con el servidor'
+      });
+    } finally {
+      setEnviando(false);
+    }
   };
 
   return (
