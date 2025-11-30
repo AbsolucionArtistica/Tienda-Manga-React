@@ -1,15 +1,22 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
 
 function Navbar() {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const { cantidadTotal, abrirCarrito } = useCarrito();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
       <div className="container">
-        <Link className="navbar-brand" to="/">
+        <Link className="navbar-brand fw-bold" to="/">
           MangoManga
         </Link>
         <button
@@ -17,68 +24,75 @@ function Navbar() {
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
         >
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto">
+          <ul className="navbar-nav ms-auto align-items-center">
             <li className="nav-item">
               <Link className={`nav-link ${location.pathname === '/' ? 'active' : ''}`} to="/">
                 Inicio
               </Link>
             </li>
             <li className="nav-item">
-              <Link
-                className={`nav-link ${location.pathname === '/tienda' ? 'active' : ''}`}
-                to="/tienda"
-              >
+              <Link className={`nav-link ${location.pathname === '/tienda' ? 'active' : ''}`} to="/tienda">
                 Tienda
               </Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="pages/contacto.html">
+              <Link className="nav-link" to="/contacto">
                 Contacto
-              </a>
+              </Link>
             </li>
-            <li className="nav-item">
+
+            {user && user.role === 'ADMIN' && (
+              <li className="nav-item">
+                <Link className={`nav-link ${location.pathname.startsWith('/admin') ? 'active' : ''}`} to="/admin/mangas">
+                  Admin
+                </Link>
+              </li>
+            )}
+
+            <li className="nav-item ms-2">
               <button
                 type="button"
-                className="nav-link btn btn-link position-relative text-white"
-                onClick={() => abrirCarrito()}
-                style={{ textDecoration: 'none' }}
+                className="nav-link btn btn-link position-relative text-white p-0"
+                onClick={abrirCarrito}
               >
-                <i className="fas fa-shopping-cart"></i>
+                <i className="fas fa-shopping-cart fa-lg"></i>
                 {cantidadTotal > 0 && (
-                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{fontSize: '0.6rem'}}>
                     {cantidadTotal}
                   </span>
                 )}
               </button>
             </li>
-            <li className="nav-item">
-              <button
-                type="button"
-                className={`nav-link btn btn-link p-0 ${
-                  location.pathname === '/login' ? 'active' : ''
-                }`}
-                onClick={() => navigate('/login')}
-                aria-label="Ir a iniciar sesión"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  fill="currentColor"
-                  className="bi bi-person-circle"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
-                  <path
-                    fillRule="evenodd"
-                    d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"
-                  />
-                </svg>
-              </button>
+
+            <li className="nav-item ms-3">
+              {user ? (
+                <div className="dropdown">
+                  <button
+                    className="nav-link btn btn-link text-white p-0"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    <i className="fas fa-user-circle fa-lg"></i>
+                  </button>
+                  <ul className="dropdown-menu dropdown-menu-end">
+                    <li><span className="dropdown-item-text fw-bold">Hola, {user.username}</span></li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li><button className="dropdown-item" onClick={handleLogout}>Cerrar Sesión</button></li>
+                  </ul>
+                </div>
+              ) : (
+                <Link className={`nav-link ${location.pathname === '/login' ? 'active' : ''}`} to="/login">
+                  <i className="fas fa-user-circle fa-lg"></i>
+                </Link>
+              )}
             </li>
           </ul>
         </div>
