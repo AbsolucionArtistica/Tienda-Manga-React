@@ -91,15 +91,12 @@ function Login() {
               </p>
               <ul className="list-unstyled mb-0">
                 <li className="d-flex align-items-start gap-2 mb-3">
-                  <span className="login-icon">★</span>
                   <span>Sincroniza tus pedidos y listas de lectura en cualquier dispositivo.</span>
                 </li>
                 <li className="d-flex align-items-start gap-2 mb-3">
-                  <span className="login-icon">★</span>
                   <span>Activa recordatorios de reposición para tomos difíciles de conseguir.</span>
                 </li>
                 <li className="d-flex align-items-start gap-2">
-                  <span className="login-icon">★</span>
                   <span>Accede a preventas privadas y cajas sorpresa temáticas.</span>
                 </li>
               </ul>

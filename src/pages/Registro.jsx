@@ -106,15 +106,12 @@ function Registro() {
               </p>
               <ul className="list-unstyled mb-0">
                 <li className="d-flex align-items-start gap-2 mb-3">
-                  <span className="login-icon">★</span>
                   <span>Accede a preventas y lanzamientos con disponibilidad limitada.</span>
                 </li>
                 <li className="d-flex align-items-start gap-2 mb-3">
-                  <span className="login-icon">★</span>
                   <span>Recibe recordatorios de continuidad de colecciones según tus gustos.</span>
                 </li>
                 <li className="d-flex align-items-start gap-2">
-                  <span className="login-icon">★</span>
                   <span>Crea listas de seguimiento y wishlist compartidas con amigos.</span>
                 </li>
               </ul>

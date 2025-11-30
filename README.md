@@ -1,16 +1,82 @@
-# React + Vite
+# Tienda Manga - Frontend React
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+E-commerce de manga construido con React + Vite, conectado a backend Node.js/Express con MySQL/Sequelize.
 
-Currently, two official plugins are available:
+## 🚀 Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+Luego abre la consola (F12) y ejecuta:
+```javascript
+await runFullCheckup()
+```
 
-The React Compiler is not enabled on this template. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Ver más en `QUICK_START.md`
 
-## Expanding the ESLint configuration
+## 📁 Estructura
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+src/
+├── components/      # Componentes React
+├── pages/          # Páginas principales
+├── services/       # Servicios HTTP (api.js, authService, etc.)
+├── context/        # Context API (Auth, Cart, Notification)
+├── hooks/          # Custom hooks
+├── utils/          # Utilidades y testing
+└── styles/         # CSS
+```
+
+## 🔧 Características
+
+- ✅ Autenticación con JWT
+- ✅ Catálogo de productos con filtros
+- ✅ Carrito de compras
+- ✅ Sistema de órdenes
+- ✅ Panel de administrador
+- ✅ Perfil de usuario
+- ✅ Responsive design
+
+## 📦 Dependencias
+
+- React 19.1.1
+- Vite 7.1.7
+- react-router-dom 7.9.3
+- axios 1.7.0
+- react-toastify 10.0.0
+
+## 🌐 Configuración
+
+Archivo `.env`:
+```env
+VITE_API_URL=http://localhost:5000/api
+VITE_APP_NAME=MangoManga
+```
+
+El backend debe estar corriendo en `http://localhost:5000`
+
+## 🛠️ Testing Automático
+
+Desde la consola del navegador:
+
+```javascript
+// Verificación completa
+await runFullCheckup()
+
+// Probar endpoint específico
+await testEndpoint('/products')
+```
+
+## 📝 Cambios Recientes
+
+**Migración MongoDB → MySQL/Sequelize**
+- Backend actualizado a MySQL
+- Frontend compatible sin cambios
+- Todos los endpoints funcional iguales
+- Ver QUICK_START.md para detalles
+
+## 📞 Soporte
+
+Ver `QUICK_START.md` para troubleshooting y guías de uso.
