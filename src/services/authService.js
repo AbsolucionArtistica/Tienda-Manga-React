@@ -7,9 +7,9 @@ const authService = {
       const response = await api.post('/auth/register', userData)
       if (response.data.token) {
         localStorage.setItem('authToken', response.data.token)
-        localStorage.setItem('user', JSON.stringify(response.data.user))
+        localStorage.setItem('user', JSON.stringify(response.data.usuario))
       }
-      return response.data
+      return { ...response.data, user: response.data.usuario }
     } catch (error) {
       throw error.response?.data || { message: 'Error en registro' }
     }
@@ -21,9 +21,9 @@ const authService = {
       const response = await api.post('/auth/login', { email, password })
       if (response.data.token) {
         localStorage.setItem('authToken', response.data.token)
-        localStorage.setItem('user', JSON.stringify(response.data.user))
+        localStorage.setItem('user', JSON.stringify(response.data.usuario || response.data.user))
       }
-      return response.data
+      return { ...response.data, user: response.data.usuario || response.data.user }
     } catch (error) {
       throw error.response?.data || { message: 'Error en login' }
     }

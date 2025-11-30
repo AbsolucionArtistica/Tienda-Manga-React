@@ -1,0 +1,462 @@
+INSTRUCCIONES PARA ARREGLAR EL BACKEND - SISTEMA DE ÓRDENES
+
+================================================================================
+PROBLEMA IDENTIFICADO
+================================================================================
+
+El frontend envía órdenes correctamente, pero el backend falla porque:
+1. Intenta buscar productos en la BD local (que no existen)
+2. No tiene un archivo de datos de productos como tiene el frontend
+3. Los IDs de productos en el frontend (1-18) no coinciden con la BD
+
+================================================================================
+SOLUCIÓN: DATOS DE PRODUCTOS
+================================================================================
+
+El backend DEBE tener los mismos datos de productos que el frontend.
+
+CREAR ARCHIVO: src/data/productos.js
+
+Contenido:
+
+```javascript
+const productosData = [
+  {
+    id: 1,
+    nombre: "One Piece Vol. 1",
+    categoria: "Shonen",
+    precio: 12990,
+    autor: "Eiichiro Oda",
+    editorial: "Shueisha",
+    stock: 15
+  },
+  {
+    id: 2,
+    nombre: "Naruto Vol. 1",
+    categoria: "Shonen",
+    precio: 11990,
+    autor: "Masashi Kishimoto",
+    editorial: "Shueisha",
+    stock: 20
+  },
+  {
+    id: 3,
+    nombre: "Attack on Titan Vol. 1",
+    categoria: "Seinen",
+    precio: 13990,
+    autor: "Hajime Isayama",
+    editorial: "Kodansha",
+    stock: 12
+  },
+  {
+    id: 4,
+    nombre: "My Hero Academia Vol. 1",
+    categoria: "Shonen",
+    precio: 12490,
+    autor: "Kohei Horikoshi",
+    editorial: "Shueisha",
+    stock: 18
+  },
+  {
+    id: 5,
+    nombre: "Death Note Vol. 1",
+    categoria: "Seinen",
+    precio: 13490,
+    autor: "Tsugumi Ohba",
+    editorial: "Shueisha",
+    stock: 10
+  },
+  {
+    id: 6,
+    nombre: "Tokyo Ghoul Vol. 1",
+    categoria: "Seinen",
+    precio: 14990,
+    autor: "Sui Ishida",
+    editorial: "Shueisha",
+    stock: 14
+  },
+  {
+    id: 7,
+    nombre: "Demon Slayer Vol. 1",
+    categoria: "Shonen",
+    precio: 12990,
+    autor: "Koyoharu Gotouge",
+    editorial: "Shueisha",
+    stock: 25
+  },
+  {
+    id: 8,
+    nombre: "Steins;Gate Vol. 1",
+    categoria: "Seinen",
+    precio: 15490,
+    autor: "Chiyomaru Shikura",
+    editorial: "5pb.",
+    stock: 9
+  },
+  {
+    id: 9,
+    nombre: "Code Geass Vol. 1",
+    categoria: "Shonen",
+    precio: 13990,
+    autor: "Ichirō Ōkouchi",
+    editorial: "Sunrise",
+    stock: 11
+  },
+  {
+    id: 10,
+    nombre: "Fullmetal Alchemist Vol. 1",
+    categoria: "Shonen",
+    precio: 14490,
+    autor: "Hiromu Arakawa",
+    editorial: "Square Enix",
+    stock: 16
+  },
+  {
+    id: 11,
+    nombre: "Nana Vol. 1",
+    categoria: "Shoujo",
+    precio: 12490,
+    autor: "Ai Yazawa",
+    editorial: "Shueisha",
+    stock: 13
+  },
+  {
+    id: 12,
+    nombre: "Bleach Vol. 1",
+    categoria: "Shonen",
+    precio: 11990,
+    autor: "Tite Kubo",
+    editorial: "Shueisha",
+    stock: 17
+  },
+  {
+    id: 13,
+    nombre: "Soul Eater Vol. 1",
+    categoria: "Shonen",
+    precio: 13490,
+    autor: "Atsushi Ōkubo",
+    editorial: "Square Enix",
+    stock: 7
+  },
+  {
+    id: 14,
+    nombre: "Mononoke Vol. 1",
+    categoria: "Seinen",
+    precio: 16990,
+    autor: "Kenji Nakamura",
+    editorial: "Aniplex",
+    stock: 5
+  },
+  {
+    id: 15,
+    nombre: "Elfen Lied Vol. 1",
+    categoria: "Seinen",
+    precio: 15990,
+    autor: "Lynn Okamoto",
+    editorial: "Kadokawa",
+    stock: 6
+  },
+  {
+    id: 16,
+    nombre: "Psycho-Pass Vol. 1",
+    categoria: "Seinen",
+    precio: 14490,
+    autor: "Ai Yoshinaga",
+    editorial: "Good Smile Company",
+    stock: 9
+  },
+  {
+    id: 17,
+    nombre: "Jujutsu Kaisen Vol. 1",
+    categoria: "Shonen",
+    precio: 12990,
+    autor: "Gege Akutami",
+    editorial: "Shueisha",
+    stock: 23
+  },
+  {
+    id: 18,
+    nombre: "Vinland Saga Vol. 1",
+    categoria: "Seinen",
+    precio: 16990,
+    autor: "Makoto Yukimura",
+    editorial: "Kodansha",
+    stock: 8
+  }
+];
+
+module.exports = { productosData };
+```
+
+================================================================================
+ACTUALIZAR CONTROLADOR DE ÓRDENES
+================================================================================
+
+En: src/controllers/orderController.js
+
+REEMPLAZAR la función crearOrden con esto:
+
+```javascript
+const { productosData } = require('../data/productos');
+
+exports.crearOrden = async (req, res) => {
+  try {
+    const { items, direccion } = req.body;
+    const usuarioId = req.user.id;
+
+    // Validar items
+    if (!items || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        mensajes: ["items debe contener al menos 1 producto"]
+      });
+    }
+
+    // Validar dirección
+    if (!direccion || !direccion.calle || !direccion.ciudad || !direccion.codigoPostal || !direccion.pais) {
+      return res.status(400).json({
+        success: false,
+        mensajes: ["Todos los campos de dirección son requeridos"]
+      });
+    }
+
+    // Validar y calcular total
+    let total = 0;
+    const itemsValidados = items.map(item => {
+      // Buscar el producto en los datos locales
+      const producto = productosData.find(p => p.id === parseInt(item.productoId));
+      
+      if (!producto) {
+        throw new Error(`Producto con ID ${item.productoId} no encontrado`);
+      }
+
+      if (item.cantidad <= 0) {
+        throw new Error(`Cantidad debe ser mayor a 0 para producto ${producto.nombre}`);
+      }
+
+      if (item.cantidad > producto.stock) {
+        throw new Error(`Stock insuficiente para ${producto.nombre}. Disponibles: ${producto.stock}`);
+      }
+
+      const subtotal = item.cantidad * (item.precio || producto.precio);
+      total += subtotal;
+
+      return {
+        productoId: item.productoId,
+        nombre: item.nombre || producto.nombre,
+        cantidad: item.cantidad,
+        precio: item.precio || producto.precio,
+        subtotal: subtotal,
+        autor: item.autor || producto.autor,
+        editorial: item.editorial || producto.editorial
+      };
+    });
+
+    // Crear la orden (adaptarse según tu BD)
+    // Ejemplo con Sequelize:
+    const orden = await Orden.create({
+      usuarioId: usuarioId,
+      items: itemsValidados,
+      total: total,
+      estado: 'pendiente',
+      direccion: direccion,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    // O si usas MongoDB:
+    // const orden = new Orden({
+    //   usuarioId: usuarioId,
+    //   items: itemsValidados,
+    //   total: total,
+    //   estado: 'pendiente',
+    //   direccion: direccion
+    // });
+    // await orden.save();
+
+    res.status(201).json({
+      success: true,
+      mensaje: "Orden creada exitosamente",
+      orden: {
+        id: orden.id,
+        usuarioId: usuarioId,
+        items: itemsValidados,
+        total: total,
+        estado: 'pendiente',
+        direccion: direccion,
+        createdAt: orden.createdAt,
+        updatedAt: orden.updatedAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Error creando orden:', error);
+    res.status(400).json({
+      success: false,
+      mensaje: error.message || 'Error al crear la orden'
+    });
+  }
+};
+```
+
+================================================================================
+ENDPOINT GET /api/orders (OBTENER ÓRDENES DEL USUARIO)
+================================================================================
+
+Añadir en el controlador:
+
+```javascript
+exports.obtenerOrdenes = async (req, res) => {
+  try {
+    const usuarioId = req.user.id;
+
+    // Sequelize
+    const ordenes = await Orden.findAll({
+      where: { usuarioId: usuarioId },
+      order: [['createdAt', 'DESC']]
+    });
+
+    // O MongoDB
+    // const ordenes = await Orden.find({ usuarioId: usuarioId }).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      ordenes: ordenes
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo órdenes:', error);
+    res.status(500).json({
+      success: false,
+      mensaje: 'Error al obtener órdenes'
+    });
+  }
+};
+
+exports.obtenerOrdenPorId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const usuarioId = req.user.id;
+
+    // Sequelize
+    const orden = await Orden.findOne({
+      where: { id: id, usuarioId: usuarioId }
+    });
+
+    // O MongoDB
+    // const orden = await Orden.findById(id);
+
+    if (!orden) {
+      return res.status(404).json({
+        success: false,
+        mensaje: 'Orden no encontrada'
+      });
+    }
+
+    res.json({
+      success: true,
+      orden: orden
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo orden:', error);
+    res.status(500).json({
+      success: false,
+      mensaje: 'Error al obtener la orden'
+    });
+  }
+};
+```
+
+================================================================================
+RUTAS
+================================================================================
+
+En: src/routes/orders.js (o donde tengas definidas las rutas)
+
+```javascript
+const express = require('express');
+const router = express.Router();
+const { protect } = require('../middleware/auth');
+const orderController = require('../controllers/orderController');
+
+// POST - Crear orden (protegida)
+router.post('/', protect, orderController.crearOrden);
+
+// GET - Obtener órdenes del usuario (protegida)
+router.get('/', protect, orderController.obtenerOrdenes);
+
+// GET - Obtener orden específica (protegida)
+router.get('/:id', protect, orderController.obtenerOrdenPorId);
+
+module.exports = router;
+```
+
+================================================================================
+MODELO DE ORDEN
+================================================================================
+
+Si usas Sequelize, crea un modelo similar a esto:
+
+```javascript
+module.exports = (sequelize, DataTypes) => {
+  const Orden = sequelize.define('Orden', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    usuarioId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    items: {
+      type: DataTypes.JSON,
+      allowNull: false
+    },
+    total: {
+      type: DataTypes.FLOAT,
+      allowNull: false
+    },
+    estado: {
+      type: DataTypes.STRING,
+      defaultValue: 'pendiente'
+    },
+    direccion: {
+      type: DataTypes.JSON,
+      allowNull: false
+    }
+  });
+
+  return Orden;
+};
+```
+
+================================================================================
+RESUMEN DE CAMBIOS NECESARIOS
+================================================================================
+
+1. ✅ Crear archivo src/data/productos.js con los 18 productos
+2. ✅ Actualizar src/controllers/orderController.js con las funciones corregidas
+3. ✅ Asegurar que exista el modelo Orden en la BD
+4. ✅ Verificar que las rutas estén correctas en src/routes/orders.js
+5. ✅ Importar el archivo de productos en el controlador
+
+================================================================================
+PRUEBA DEL SISTEMA
+================================================================================
+
+Una vez hecho esto:
+
+1. Backend debe tener archivo src/data/productos.js
+2. Frontend en Checkout.jsx ya está actualizado
+3. Ejecutar: npm run dev (en backend)
+4. Ejecutar: npm run dev (en frontend)
+5. Crear usuario
+6. Agregar producto al carrito
+7. Ir a checkout
+8. Hacer orden
+
+Debería crear exitosamente y redirigir a /ordenes
+
+================================================================================

@@ -36,15 +36,11 @@ function Registro() {
     }
 
     if (formulario.password.length < 6) {
-      nuevosErrores.password = 'La contraseña debe tener al menos 6 caracteres.';
+      nuevosErrores.password = '.';
     }
 
     if (formulario.password !== formulario.confirmarPassword) {
       nuevosErrores.confirmarPassword = 'Las contraseñas deben coincidir exactamente.';
-    }
-
-    if (!formulario.ciudad.trim()) {
-      nuevosErrores.ciudad = 'Necesitamos una ciudad para estimar tiempos de envío.';
     }
 
     return nuevosErrores;
@@ -67,8 +63,6 @@ function Registro() {
         nombre: formulario.nombre.trim(),
         email: formulario.email.trim(),
         password: formulario.password,
-        telefono: formulario.telefono.trim(),
-        ciudad: formulario.ciudad.trim(),
       });
 
       if (result.success) {
