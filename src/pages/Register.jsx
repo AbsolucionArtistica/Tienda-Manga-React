@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { login as loginService } from '../services/authService';
+import { register as registerService } from '../services/authService';
 
-const Login = () => {
+const Register = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [role, setRole] = useState('CLIENTE');
     const [error, setError] = useState('');
-    const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -19,13 +19,16 @@ const Login = () => {
             return;
         }
 
+        if (password !== confirmPassword) {
+            setError('Las contraseñas no coinciden.');
+            return;
+        }
+
         try {
-            const data = await loginService(username, password);
-            login(data);
-            navigate('/tienda');
+            await registerService(username, password, role);
+            navigate('/login');
         } catch (err) {
-            console.error(err);
-            setError('Usuario o contraseña incorrectos');
+            setError('Error al registrar usuario: ' + err.message);
         }
     };
 
@@ -38,24 +41,23 @@ const Login = () => {
                             <div className="row g-0">
                                 {/* Sección Izquierda - Bienvenida */}
                                 <div className="col-md-6 bg-dark text-white p-5 d-flex flex-column justify-content-center">
-                                    <h2 className="fw-bold mb-4">Bienvenido de vuelta</h2>
+                                    <h2 className="fw-bold mb-4">Únete a MangoManga</h2>
                                     <p className="text-white-50 mb-4">
-                                        Accede a tu cuenta para continuar explorando catálogos exclusivos,
-                                        guardar tus colecciones y recibir alertas tempranas de lanzamientos.
+                                        Crea tu cuenta hoy y comienza a disfrutar de todos los beneficios de nuestra comunidad otaku.
                                     </p>
 
                                     <ul className="list-unstyled text-white-50">
                                         <li className="mb-3 d-flex align-items-start">
-                                            <i className="fas fa-star text-warning me-3 mt-1"></i>
-                                            <span>Sincroniza tus pedidos y listas de lectura en cualquier dispositivo.</span>
+                                            <i className="fas fa-check-circle text-danger me-3 mt-1"></i>
+                                            <span>Acceso exclusivo a preventas y ediciones limitadas.</span>
                                         </li>
                                         <li className="mb-3 d-flex align-items-start">
-                                            <i className="fas fa-star text-warning me-3 mt-1"></i>
-                                            <span>Activa recordatorios de reposición para tomos difíciles de conseguir.</span>
+                                            <i className="fas fa-check-circle text-danger me-3 mt-1"></i>
+                                            <span>Guarda tus mangas favoritos y recibe notificaciones de stock.</span>
                                         </li>
                                         <li className="mb-3 d-flex align-items-start">
-                                            <i className="fas fa-star text-warning me-3 mt-1"></i>
-                                            <span>Accede a preventas privadas y cajas sorpresa temáticas.</span>
+                                            <i className="fas fa-check-circle text-danger me-3 mt-1"></i>
+                                            <span>Historial de compras y seguimiento de pedidos en tiempo real.</span>
                                         </li>
                                     </ul>
                                 </div>
@@ -63,63 +65,68 @@ const Login = () => {
                                 {/* Sección Derecha - Formulario */}
                                 <div className="col-md-6 p-5 text-white" style={{ backgroundColor: '#151515' }}>
                                     <div className="text-center mb-4">
-                                        <h3 className="text-danger fw-bold">Iniciar sesión</h3>
+                                        <h3 className="text-danger fw-bold">Crear cuenta</h3>
                                     </div>
 
                                     {error && <div className="alert alert-danger">{error}</div>}
 
                                     <form onSubmit={handleSubmit}>
                                         <div className="mb-3">
-                                            <label className="form-label text-white-50 small">Correo electrónico</label>
+                                            <label className="form-label text-white-50 small">Nombre de usuario</label>
                                             <input
                                                 type="text"
                                                 className="form-control bg-dark text-white border-secondary"
                                                 value={username}
                                                 onChange={(e) => setUsername(e.target.value)}
-                                                placeholder="usuario@mangomanga.cl"
+                                                placeholder="Elige un nombre de usuario"
                                                 required
                                             />
                                         </div>
                                         <div className="mb-3">
-                                            <div className="d-flex justify-content-between">
-                                                <label className="form-label text-white-50 small">Contraseña</label>
-                                                <a href="#" className="text-danger small text-decoration-none">¿Olvidaste tu clave?</a>
-                                            </div>
+                                            <label className="form-label text-white-50 small">Contraseña</label>
                                             <input
                                                 type="password"
                                                 className="form-control bg-dark text-white border-secondary"
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
-                                                placeholder="••••••••"
+                                                placeholder="Mínimo 6 caracteres"
                                                 required
                                             />
                                         </div>
-
-                                        <div className="mb-4 form-check">
-                                            <input type="checkbox" className="form-check-input bg-dark border-secondary" id="remember" />
-                                            <label className="form-check-label text-white-50 small" htmlFor="remember">
-                                                Mantener sesión activa en este equipo
-                                            </label>
+                                        <div className="mb-3">
+                                            <label className="form-label text-white-50 small">Confirmar Contraseña</label>
+                                            <input
+                                                type="password"
+                                                className="form-control bg-dark text-white border-secondary"
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                placeholder="Repite tu contraseña"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="mb-4">
+                                            <label className="form-label text-white-50 small">Tipo de cuenta</label>
+                                            <select
+                                                className="form-select bg-dark text-white border-secondary"
+                                                value={role}
+                                                onChange={(e) => setRole(e.target.value)}
+                                            >
+                                                <option value="CLIENTE">Cliente (Comprador)</option>
+                                                <option value="ADMIN">Administrador (Gestión)</option>
+                                            </select>
                                         </div>
 
                                         <button type="submit" className="btn btn-danger w-100 py-2 fw-bold mb-4">
-                                            Entrar a mi cuenta
+                                            Registrarse
                                         </button>
 
-                                        <div className="text-center mb-4">
-                                            <span className="text-white-50 small">¿Aún no te unes a MangoManga?</span>
+                                        <div className="text-center">
+                                            <span className="text-white-50 small">¿Ya tienes una cuenta?</span>
                                             <div className="mt-2">
-                                                <Link to="/register" className="btn btn-outline-secondary btn-sm">
-                                                    Crear cuenta nueva
+                                                <Link to="/login" className="btn btn-outline-secondary btn-sm">
+                                                    Iniciar sesión
                                                 </Link>
                                             </div>
-                                        </div>
-
-                                        <div className="p-3 rounded border border-secondary border-opacity-25" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                                            <p className="mb-1 small text-white-50">Consejo rápido:</p>
-                                            <p className="mb-0 small text-white-50" style={{ fontSize: '0.8rem' }}>
-                                                Asegura tu cuenta activando la verificación en dos pasos desde tu panel de usuario.
-                                            </p>
                                         </div>
                                     </form>
                                 </div>
@@ -132,4 +139,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default Register;
