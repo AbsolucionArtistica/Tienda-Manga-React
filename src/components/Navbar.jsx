@@ -83,7 +83,7 @@ function Navbar() {
                     <i className="fas fa-user-circle fa-lg"></i>
                   </button>
                   <ul className="dropdown-menu dropdown-menu-end">
-                    <li><span className="dropdown-item-text fw-bold">Hola, {user.username}</span></li>
+                    <li><Link className="dropdown-item fw-bold" to="/perfil">Hola, {user.username}</Link></li>
                     <li><hr className="dropdown-divider" /></li>
                     <li><button className="dropdown-item" onClick={handleLogout}>Cerrar Sesión</button></li>
                   </ul>
