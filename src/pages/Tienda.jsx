@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { obtenerMangas, categorias, formatearPrecio } from '../data/mangas'
+import { categorias, formatearPrecio } from '../data/mangas'
+import productService from '../services/productService'
 import { useCarrito } from '../context/CarritoContext'
 import { Link } from 'react-router-dom'
 
@@ -22,7 +23,10 @@ const Tienda = () => {
     const cargarProductos = async () => {
       setCargando(true)
       try {
-        const mangasObtenidos = await obtenerMangas()
+        // Fetch all products (limit 1000) to keep client-side filtering logic working
+        const response = await productService.getProducts(1, 1000)
+        // Handle both API response (response.productos) and fallback (response.data)
+        const mangasObtenidos = response.productos || response.data || []
         setProductos(mangasObtenidos)
         setProductosFiltrados(mangasObtenidos)
       } catch (error) {
@@ -213,6 +217,7 @@ const Tienda = () => {
                     alt={producto.nombre}
                     style={{ height: 260, objectFit: 'cover' }}
                     onError={(e) => { e.target.src = 'https://via.placeholder.com/300x400?text=Manga' }}
+                    referrerPolicy="no-referrer"
                   />
                 </Link>
                 <div className="card-body d-flex flex-column">
@@ -248,7 +253,7 @@ const Tienda = () => {
                     <i className="fas fa-chevron-left"></i>
                   </button>
                 </li>
-                
+
                 {[...Array(totalPaginas)].map((_, index) => {
                   const numeroPagina = index + 1
                   return (
@@ -262,7 +267,7 @@ const Tienda = () => {
                     </li>
                   )
                 })}
-                
+
                 <li className={`page-item ${paginaActual === totalPaginas ? 'disabled' : ''}`}>
                   <button
                     className="page-link"

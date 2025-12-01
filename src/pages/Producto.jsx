@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { obtenerMangas, formatearPrecio } from '../data/mangas'
+import { formatearPrecio } from '../data/mangas'
+import productService from '../services/productService'
 import { useCarrito } from '../context/CarritoContext'
 
 const Producto = () => {
@@ -15,10 +16,9 @@ const Producto = () => {
     const cargar = async () => {
       setCargando(true)
       try {
-        const listado = await obtenerMangas()
+        const response = await productService.getProductById(id)
         if (!mounted) return
-        const encontrado = listado.find(p => String(p.id) === String(id)) || null
-        setProducto(encontrado)
+        setProducto(response.producto || response.data)
       } catch (err) {
         console.error('Error cargando mangas:', err)
         if (mounted) setProducto(null)
@@ -51,6 +51,7 @@ const Producto = () => {
             alt={producto.nombre}
             className="img-fluid rounded shadow-sm"
             onError={(e) => { e.target.src = 'https://via.placeholder.com/400x550?text=Manga' }}
+            referrerPolicy="no-referrer"
           />
         </div>
         <div className="col-md-7">

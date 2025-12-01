@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRef } from 'react'
-import { obtenerMangas, formatearPrecio } from '../data/mangas'
+import { formatearPrecio } from '../data/mangas'
+import productService from '../services/productService'
 import { Link } from 'react-router-dom'
 
 const Carrusel = ({ itemsPerSlide = 4 }) => {
@@ -13,7 +14,8 @@ const Carrusel = ({ itemsPerSlide = 4 }) => {
     const cargar = async () => {
       setCargando(true)
       try {
-        const data = await obtenerMangas()
+        const response = await productService.getProducts(1, 12) // Fetch top 12 for carousel
+        const data = response.productos || response.data || []
         if (mounted) setMangas(data)
       } catch (e) {
         console.error(e)
@@ -111,6 +113,7 @@ const Carrusel = ({ itemsPerSlide = 4 }) => {
                       style={{ height: 260, objectFit: 'cover' }}
                       onError={(e) => { e.target.src = 'https://via.placeholder.com/300x400/cccccc/666666?text=Manga' }}
                       onLoad={actualizarAltura}
+                      referrerPolicy="no-referrer"
                     />
                     <div className="card-body d-flex flex-column">
                       <h6 className="card-title mb-1">{producto.nombre}</h6>
