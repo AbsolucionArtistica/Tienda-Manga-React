@@ -1,122 +1,95 @@
-import { createContext, useContext, useState, useEffect } from 'react'
-import authService from '../services/authService'
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import authService from '../services/authService';
 
-const AuthContext = createContext()
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null)
-  const [token, setToken] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Verificar sesión al cargar
   useEffect(() => {
-    const initAuth = () => {
-      const savedToken = localStorage.getItem('authToken')
-      const savedUser = localStorage.getItem('user')
-      
-      if (savedToken && savedUser) {
-        setToken(savedToken)
+    const initAuth = async () => {
+      const currentUser = authService.getCurrentUser();
+      if (currentUser) {
         try {
-          setUser(JSON.parse(savedUser))
+          // Verificar validez del token con el backend
+          const result = await authService.checkAuth();
+          if (result.success) {
+            setUser(result.user);
+            setIsAuthenticated(true);
+          } else {
+            authService.logout();
+            setUser(null);
+            setIsAuthenticated(false);
+          }
         } catch (error) {
-          console.error('Error parsing user:', error)
-          localStorage.removeItem('user')
-          localStorage.removeItem('authToken')
+          // Si falla la verificación (token expirado/inválido), cerrar sesión
+          authService.logout();
+          setUser(null);
+          setIsAuthenticated(false);
         }
       }
-      
-      setLoading(false)
-    }
-
-    initAuth()
-  }, [])
+      setLoading(false);
+    };
+    initAuth();
+  }, []);
 
   const login = async (email, password) => {
-    setLoading(true)
     try {
-      const response = await authService.login(email, password)
-      setToken(response.token)
-      setUser(response.user)
-      localStorage.setItem('authToken', response.token)
-      localStorage.setItem('user', JSON.stringify(response.user))
-      return { success: true, data: response }
+      const data = await authService.login(email, password);
+      setUser(data.user);
+      setIsAuthenticated(true);
+      return { success: true };
     } catch (error) {
-      return { success: false, error: error.message || 'Error en login' }
-    } finally {
-      setLoading(false)
+      return { success: false, message: error.response?.data?.mensaje || 'Error al iniciar sesión' };
     }
-  }
+  };
 
   const register = async (userData) => {
-    setLoading(true)
     try {
-      const response = await authService.register(userData)
-      setToken(response.token)
-      setUser(response.user)
-      localStorage.setItem('authToken', response.token)
-      localStorage.setItem('user', JSON.stringify(response.user))
-      return { success: true, data: response }
+      const data = await authService.register(userData);
+      setUser(data.user);
+      setIsAuthenticated(true);
+      return { success: true };
     } catch (error) {
-      return { success: false, error: error.message || 'Error en registro' }
-    } finally {
-      setLoading(false)
+      return { success: false, message: error.response?.data?.mensaje || 'Error al registrarse' };
     }
-  }
+  };
 
   const logout = () => {
-    authService.logout()
-    setUser(null)
-    setToken(null)
-  }
-
-  const updateProfile = async (userData) => {
-    try {
-      const response = await authService.updateProfile(user.id, userData)
-      setUser(response.user)
-      localStorage.setItem('user', JSON.stringify(response.user))
-      return { success: true, data: response }
-    } catch (error) {
-      return { success: false, error: error.message || 'Error actualizando perfil' }
-    }
-  }
-
-  const changePassword = async (currentPassword, newPassword) => {
-    try {
-      const response = await authService.changePassword(user.id, currentPassword, newPassword)
-      return { success: true, data: response }
-    } catch (error) {
-      return { success: false, error: error.message || 'Error cambiando contraseña' }
-    }
-  }
+    authService.logout();
+    setUser(null);
+    setIsAuthenticated(false);
+  };
 
   const isAdmin = () => {
-    return user?.role === 'admin' || user?.isAdmin === true
-  }
+    return user?.role === 'admin' || user?.isAdmin === true;
+  };
 
   const value = {
     user,
-    token,
     loading,
-    isAuthenticated: !!token,
+    isAuthenticated,
     login,
     register,
     logout,
-    updateProfile,
-    changePassword,
     isAdmin
-  }
+  };
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
 
 export const useAuth = () => {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth debe usarse dentro de un AuthProvider')
+    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
   }
-  return context
-}
+  return context;
+};
+
+export default AuthContext;
