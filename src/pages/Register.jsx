@@ -4,9 +4,11 @@ import { register as registerService } from '../services/authService';
 
 const Register = () => {
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [direccion, setDireccion] = useState('');
+    const [telefono, setTelefono] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [role, setRole] = useState('CLIENTE');
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -25,7 +27,7 @@ const Register = () => {
         }
 
         try {
-            await registerService(username, password, role);
+            await registerService(username, password, email, direccion, telefono);
             navigate('/login');
         } catch (err) {
             setError('Error al registrar usuario: ' + err.message);
@@ -83,6 +85,39 @@ const Register = () => {
                                             />
                                         </div>
                                         <div className="mb-3">
+                                            <label className="form-label text-white-50 small">Correo Electrónico</label>
+                                            <input
+                                                type="email"
+                                                className="form-control bg-dark text-white border-secondary"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                placeholder="ejemplo@correo.com"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="mb-3">
+                                            <label className="form-label text-white-50 small">Dirección</label>
+                                            <input
+                                                type="text"
+                                                className="form-control bg-dark text-white border-secondary"
+                                                value={direccion}
+                                                onChange={(e) => setDireccion(e.target.value)}
+                                                placeholder="Tu dirección completa"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="mb-3">
+                                            <label className="form-label text-white-50 small">Teléfono</label>
+                                            <input
+                                                type="tel"
+                                                className="form-control bg-dark text-white border-secondary"
+                                                value={telefono}
+                                                onChange={(e) => setTelefono(e.target.value)}
+                                                placeholder="+56 9 1234 5678"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="mb-3">
                                             <label className="form-label text-white-50 small">Contraseña</label>
                                             <input
                                                 type="password"
@@ -103,17 +138,6 @@ const Register = () => {
                                                 placeholder="Repite tu contraseña"
                                                 required
                                             />
-                                        </div>
-                                        <div className="mb-4">
-                                            <label className="form-label text-white-50 small">Tipo de cuenta</label>
-                                            <select
-                                                className="form-select bg-dark text-white border-secondary"
-                                                value={role}
-                                                onChange={(e) => setRole(e.target.value)}
-                                            >
-                                                <option value="CLIENTE">Cliente (Comprador)</option>
-                                                <option value="ADMIN">Administrador (Gestión)</option>
-                                            </select>
                                         </div>
 
                                         <button type="submit" className="btn btn-danger w-100 py-2 fw-bold mb-4">
