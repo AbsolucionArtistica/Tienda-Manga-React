@@ -16,13 +16,13 @@ export const login = async (username, password) => {
     return await response.json();
 };
 
-export const register = async (username, password, role = 'CLIENTE') => {
+export const register = async (username, password, email, direccion, telefono) => {
     const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password, role }),
+        body: JSON.stringify({ username, password, email, direccion, telefono }),
     });
 
     if (!response.ok) {
