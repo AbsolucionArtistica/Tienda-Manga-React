@@ -8,7 +8,7 @@ const carritoReducer = (state, action) => {
   switch (action.type) {
     case 'AGREGAR_PRODUCTO':
       const productoExistente = state.find(item => item.id === action.payload.id)
-      
+
       if (productoExistente) {
         // Si el producto ya existe, incrementar cantidad
         return state.map(item =>
@@ -45,27 +45,24 @@ const carritoReducer = (state, action) => {
   }
 }
 
-// Provider del contexto
 export const CarritoProvider = ({ children }) => {
-  const [carrito, dispatch] = useReducer(carritoReducer, [])
+  // Inicializar carrito desde localStorage
+  const [carrito, dispatch] = useReducer(carritoReducer, [], () => {
+    const localData = localStorage.getItem('carrito')
+    return localData ? JSON.parse(localData) : []
+  })
+
   const [isOpen, setIsOpen] = useState(false)
 
-  // Cargar carrito desde localStorage al inicio
-  useEffect(() => {
-    const carritoGuardado = localStorage.getItem('carrito')
-    if (carritoGuardado) {
-      dispatch({ type: 'CARGAR_CARRITO', payload: JSON.parse(carritoGuardado) })
-    }
-  }, [])
-
-  // Guardar carrito en localStorage cuando cambie
+  // Guardar en localStorage cada vez que cambia el carrito
   useEffect(() => {
     localStorage.setItem('carrito', JSON.stringify(carrito))
   }, [carrito])
 
-  // Funciones helper
+  // Acciones
   const agregarAlCarrito = (producto) => {
     dispatch({ type: 'AGREGAR_PRODUCTO', payload: producto })
+    setIsOpen(true)
   }
 
   const eliminarDelCarrito = (id) => {
@@ -80,9 +77,14 @@ export const CarritoProvider = ({ children }) => {
     dispatch({ type: 'VACIAR_CARRITO' })
   }
 
-  // Calcular totales
-  const cantidadTotal = carrito.reduce((total, item) => total + item.cantidad, 0)
-  const precioTotal = carrito.reduce((total, item) => total + (item.precio * item.cantidad), 0)
+  // Cálculos
+  const cantidadTotal = carrito.reduce((acc, item) => acc + item.cantidad, 0)
+  const precioTotal = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0)
+
+  // Funciones para controlar la apertura del carrito lateral
+  const abrirCarrito = () => setIsOpen(true)
+  const cerrarCarrito = () => setIsOpen(false)
+  const toggleCarrito = () => setIsOpen(v => !v)
 
   const value = {
     carrito,
@@ -91,18 +93,12 @@ export const CarritoProvider = ({ children }) => {
     actualizarCantidad,
     vaciarCarrito,
     cantidadTotal,
-    precioTotal
+    precioTotal,
+    isOpen,
+    abrirCarrito,
+    cerrarCarrito,
+    toggleCarrito
   }
-
-  // funciones para controlar la apertura del carrito lateral
-  const abrirCarrito = () => setIsOpen(true)
-  const cerrarCarrito = () => setIsOpen(false)
-  const toggleCarrito = () => setIsOpen(v => !v)
-
-  value.isOpen = isOpen
-  value.abrirCarrito = abrirCarrito
-  value.cerrarCarrito = cerrarCarrito
-  value.toggleCarrito = toggleCarrito
 
   return (
     <CarritoContext.Provider value={value}>
@@ -119,3 +115,5 @@ export const useCarrito = () => {
   }
   return context
 }
+
+export default CarritoContext
