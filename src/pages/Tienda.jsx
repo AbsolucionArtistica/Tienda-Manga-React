@@ -33,11 +33,15 @@ const Tienda = () => {
   useEffect(() => {
     const cargarProductos = async () => {
       setCargando(true)
+      let mangasBackend = []
+      let mangasApi = []
+
       try {
+        // 1. Intentar cargar del Backend
         try {
           const data = await getAllMangas()
           if (data && data.length > 0) {
-            const mangasBackend = data.map(m => ({
+            mangasBackend = data.map(m => ({
               id: m.id,
               nombre: m.titulo,
               autor: m.autor,
@@ -46,24 +50,36 @@ const Tienda = () => {
               imagen: m.imagenUrl || 'https://via.placeholder.com/300x400?text=Manga',
               descripcion: m.editorial || 'Sin descripción',
               rating: 5,
-              generos: ['Shounen']
+              generos: ['Shounen'] // Por defecto para productos locales
             }))
-            setProductos(mangasBackend)
-            setProductosFiltrados(mangasBackend)
-            return
           }
         } catch (errorBackend) {
-          console.warn(errorBackend)
+          console.warn('Backend no disponible o vacío:', errorBackend)
         }
 
-        const data = await obtenerMangasPopulares()
-        setProductos(data)
-        setProductosFiltrados(data)
+        // 2. Cargar de la API (siempre, para complementar)
+        try {
+            mangasApi = await obtenerMangasPopulares()
+        } catch (errorApi) {
+            console.error('Error API:', errorApi)
+            // Si falla API y no hay backend, usar local
+            if (mangasBackend.length === 0) {
+                const dataLocal = obtenerMangas()
+                mangasApi = dataLocal
+            }
+        }
+
+        // 3. Combinar (Backend primero)
+        const combinados = [...mangasBackend, ...mangasApi]
+
+        // Eliminar duplicados por ID si los hubiera (aunque IDs de backend y API deberían ser distintos)
+        const unicos = combinados.filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i)
+
+        setProductos(unicos)
+        setProductosFiltrados(unicos)
+
       } catch (error) {
-        console.error(error)
-        const dataLocal = obtenerMangas()
-        setProductos(dataLocal)
-        setProductosFiltrados(dataLocal)
+        console.error('Error general al cargar productos:', error)
       } finally {
         setCargando(false)
       }
