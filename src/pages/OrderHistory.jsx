@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import orderService from '../services/orderService';
 
 function OrderHistory() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ function OrderHistory() {
     try {
       setLoading(true);
       const token = localStorage.getItem('authToken');
-      
+
       if (!token) {
         setError('No estás autenticado. Por favor inicia sesión.');
         setLoading(false);
@@ -33,7 +34,7 @@ function OrderHistory() {
       } catch (e) {
         console.log('No se pudo decodificar token:', e);
       }
-      
+
       const response = await fetch('http://localhost:5000/api/orders', {
         method: 'GET',
         headers: {
@@ -41,21 +42,21 @@ function OrderHistory() {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       console.log('Status:', response.status);
-      
+
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);
       }
-      
+
       const result = await response.json();
       console.log('Resultado completo del backend:', result);
       console.log('Tipo de ordenes:', typeof result.ordenes);
       console.log('Array ordenes?:', Array.isArray(result.ordenes));
-      
+
       let ordenesData = result.ordenes || result.data || result || [];
       console.log('OrdensData antes de map:', ordenesData);
-      
+
       // Si es un array directamente
       if (Array.isArray(ordenesData)) {
         console.log('Parseando ordenes...');
@@ -68,7 +69,7 @@ function OrderHistory() {
           };
         });
       }
-      
+
       console.log('OrdensData final:', ordenesData);
       setOrdenes(Array.isArray(ordenesData) ? ordenesData : []);
       setError(null);
@@ -243,6 +244,26 @@ function OrderHistory() {
                   >
                     Cerrar
                   </button>
+                  {selectedOrder.estado === 'pendiente' && (
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={async () => {
+                        if (window.confirm('¿Estás seguro de cancelar esta orden?')) {
+                          try {
+                            await orderService.cancelOrder(selectedOrder.id);
+                            alert('Orden cancelada exitosamente');
+                            setSelectedOrder(null);
+                            cargarOrdenes(); // Recargar lista
+                          } catch (err) {
+                            alert(err.message || 'Error al cancelar orden');
+                          }
+                        }
+                      }}
+                    >
+                      Cancelar Orden
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
