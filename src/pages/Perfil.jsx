@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getMyOrders } from '../services/orderService';
 
 function Perfil() {
   const [usuarioActivo, setUsuarioActivo] = useState(null);
   const [alertasPerfil, setAlertasPerfil] = useState([]);
+  const [pedidos, setPedidos] = useState([]);
 
   useEffect(() => {
     const datosGuardados = localStorage.getItem('usuarioActivo');
@@ -15,10 +17,18 @@ function Perfil() {
         if (!usuario.telefono) {
           alertas.push('Agrega un teléfono de contacto para coordinar entregas express.');
         }
-        if (!usuario.ciudad) {
-          alertas.push('Define tu ciudad principal para calcular plazos de despacho.');
+        if (!usuario.direccion) {
+            alertas.push('Verifica tu dirección de despacho.');
         }
         setAlertasPerfil(alertas);
+
+        // Fetch orders
+        if (usuario.token) {
+            getMyOrders(usuario.token)
+                .then(data => setPedidos(data))
+                .catch(err => console.error("Error fetching orders:", err));
+        }
+
       } catch (error) {
         console.error('No fue posible leer los datos del usuario activo:', error);
         setUsuarioActivo(null);
@@ -58,26 +68,49 @@ function Perfil() {
                   <div className="vstack gap-3">
                     <div>
                       <h2 className="h6 text-uppercase text-secondary mb-1">Datos personales</h2>
-                      <p className="mb-0 fw-semibold">{usuarioActivo.nombre}</p>
+                      <p className="mb-0 fw-semibold">{usuarioActivo.username}</p>
                       <p className="mb-0 text-muted">{usuarioActivo.email}</p>
                     </div>
                     <div>
                       <h2 className="h6 text-uppercase text-secondary mb-1">Contacto</h2>
                       <p className="mb-0">
-                        {usuarioActivo.telefono || 'Teléfono pendiente de completar'}
+                        Teléfono: {usuarioActivo.telefono || 'No registrado'}
                       </p>
                       <p className="mb-0 text-muted">
-                        Ciudad preferida de despacho: {usuarioActivo.ciudad || 'Sin definir'}
+                        Dirección: {usuarioActivo.direccion || 'No registrada'}
                       </p>
                     </div>
+
+                    <hr />
+
                     <div>
-                      <h2 className="h6 text-uppercase text-secondary mb-1">Preferencias</h2>
-                      <p className="mb-0 text-muted">
-                        Última actualización: {usuarioActivo.actualizadoEl || 'sin registro'}
-                      </p>
-                      <p className="mb-0 text-muted">
-                        Notificaciones: {usuarioActivo.notificaciones || 'activas por defecto'}
-                      </p>
+                        <h2 className="h6 text-uppercase text-secondary mb-3">Mis Pedidos</h2>
+                        {pedidos.length > 0 ? (
+                            <div className="table-responsive">
+                                <table className="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Fecha</th>
+                                            <th>Total</th>
+                                            <th>Items</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {pedidos.map(pedido => (
+                                            <tr key={pedido.id}>
+                                                <td>#{pedido.id}</td>
+                                                <td>{new Date(pedido.fecha).toLocaleDateString()}</td>
+                                                <td>${pedido.total}</td>
+                                                <td>{pedido.mangas ? pedido.mangas.length : 0}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <p className="text-muted">No has realizado pedidos aún.</p>
+                        )}
                     </div>
                   </div>
                 ) : (
