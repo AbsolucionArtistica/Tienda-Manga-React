@@ -1,11 +1,13 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
 import { formatearPrecio } from '../data/mangas';
-
-const formatoExpiracion = /^(0[1-9]|1[0-2])\/\d{2}$/;
+import { createOrder } from '../services/orderService';
+import { esCvvValido, esExpiracionValida, esTarjetaValida } from '../utils/validators';
 
 const Checkout = () => {
   const { carrito, precioTotal, cantidadTotal, vaciarCarrito } = useCarrito();
+  const { user } = useAuth();
   const [form, setForm] = useState({
     nombre: '',
     email: '',
@@ -15,15 +17,6 @@ const Checkout = () => {
     cvv: '',
   });
   const [errores, setErrores] = useState({});
-
-  const esTarjetaValida = (valor) => {
-    const limpia = valor.replace(/\s+/g, '');
-    return /^\d{16}$/.test(limpia);
-  };
-
-  const esExpiracionValida = (valor) => formatoExpiracion.test(valor);
-
-  const esCvvValido = (valor) => /^\d{3}$/.test(valor);
 
   const manejarCambio = (e) => {
     const { name, value } = e.target;
@@ -55,18 +48,37 @@ const Checkout = () => {
       return;
     }
 
+    const token = user?.token || localStorage.getItem('token');
+    const payloadItems = carrito.map((item) => ({ id: item.id, cantidad: item.cantidad }));
+
+    // Si no hay token (modo sin backend), confirma igual para que el flujo de pruebas siga
+    if (!token) {
+      alert(
+        `Gracias ${form.nombre}!\nPedido: ${cantidadTotal} productos.\nTotal: ${formatearPrecio(
+          precioTotal
+        )}`
+      );
+      vaciarCarrito();
+      return;
+    }
+
     setErrores({});
-    // Aquí normalmente validas y envías a un backend/TPV
-    alert(
-      `Gracias ${form.nombre}!\nPedido: ${cantidadTotal} productos.\nTotal: ${formatearPrecio(
-        precioTotal
-      )}`
-    );
-    vaciarCarrito();
+    createOrder(token, payloadItems)
+      .then(() => {
+        alert(
+          `Gracias ${form.nombre}!\nPedido: ${cantidadTotal} productos.\nTotal: ${formatearPrecio(
+            precioTotal
+          )}`
+        );
+        vaciarCarrito();
+      })
+      .catch(() => {
+        setErrores({ carrito: 'No se pudo registrar la orden. Intenta nuevamente.' });
+      });
   };
 
   return (
-    <div className="container py-4">
+    <main className="container py-4">
       <h2>Checkout</h2>
       <div className="row">
         <div className="col-md-6">
@@ -195,7 +207,7 @@ const Checkout = () => {
           </form>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

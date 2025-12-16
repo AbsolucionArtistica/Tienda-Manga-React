@@ -1,0 +1,22 @@
+# Build outputs
+/target/
+
+# IDE metadata
+/.idea/
+/.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# OS junk
+.DS_Store
+Thumbs.db

@@ -1,0 +1,92 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.tiendamanga:backend >-----------------------
+[INFO] Building backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.2.3:run (default-cli) > test-compile @ backend >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ backend ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ backend ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ backend ---
+[INFO] skip non existing resourceDirectory C:\Users\Joaquin\Downloads\Tienda-Manga-React\Backend2-main\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ backend ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] <<< spring-boot:3.2.3:run (default-cli) < test-compile @ backend <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.2.3:run (default-cli) @ backend ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2025-12-15T19:52:20.244-03:00  INFO 17016 --- [backend] [           main] com.tiendamanga.Application              : Starting Application using Java 17.0.16 with PID 17016 (C:\Users\Joaquin\Downloads\Tienda-Manga-React\Backend2-main\target\classes started by Joaquin in C:\Users\Joaquin\Downloads\Tienda-Manga-React\Backend2-main)
+2025-12-15T19:52:20.256-03:00  INFO 17016 --- [backend] [           main] com.tiendamanga.Application              : No active profile set, falling back to 1 default profile: "default"
+2025-12-15T19:52:21.615-03:00  INFO 17016 --- [backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-15T19:52:21.793-03:00  INFO 17016 --- [backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 161 ms. Found 3 JPA repository interfaces.
+2025-12-15T19:52:23.042-03:00  INFO 17016 --- [backend] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-12-15T19:52:23.064-03:00  INFO 17016 --- [backend] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-12-15T19:52:23.065-03:00  INFO 17016 --- [backend] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-12-15T19:52:23.170-03:00  INFO 17016 --- [backend] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-12-15T19:52:23.173-03:00  INFO 17016 --- [backend] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2834 ms
+2025-12-15T19:52:23.234-03:00  INFO 17016 --- [backend] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-12-15T19:52:23.686-03:00  INFO 17016 --- [backend] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2025-12-15T19:52:23.690-03:00  INFO 17016 --- [backend] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-12-15T19:52:23.708-03:00  INFO 17016 --- [backend] [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
+2025-12-15T19:52:23.979-03:00  INFO 17016 --- [backend] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-15T19:52:24.081-03:00  INFO 17016 --- [backend] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2025-12-15T19:52:24.166-03:00  INFO 17016 --- [backend] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-12-15T19:52:24.664-03:00  INFO 17016 --- [backend] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-15T19:52:24.744-03:00  WARN 17016 --- [backend] [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-12-15T19:52:26.521-03:00  INFO 17016 --- [backend] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: create table mangas (id bigint generated by default as identity, autor varchar(255), editorial varchar(255), imagen_url varchar(255), precio float(53), stock integer, titulo varchar(255), primary key (id))
+Hibernate: create table order_mangas (order_id bigint not null, manga_id bigint not null)
+Hibernate: create table orders (id bigint generated by default as identity, fecha timestamp(6), total float(53), user_id bigint not null, primary key (id))
+Hibernate: create table users (id bigint generated by default as identity, direccion varchar(255) not null, email varchar(255) not null, password varchar(255) not null, role varchar(255) check (role in ('ADMIN','CLIENTE')), telefono varchar(255) not null, username varchar(255) not null, primary key (id))
+Hibernate: alter table if exists users drop constraint if exists UK_r43af9ap4edm43mmtq01oddj6
+Hibernate: alter table if exists users add constraint UK_r43af9ap4edm43mmtq01oddj6 unique (username)
+Hibernate: alter table if exists order_mangas add constraint FKkisxj6u6asicaq1nmlas6m6hj foreign key (manga_id) references mangas
+Hibernate: alter table if exists order_mangas add constraint FKe0rifibk0nbs21ew0yqbb1jug foreign key (order_id) references orders
+Hibernate: alter table if exists orders add constraint FK32ql8ubntj5uh44ph9659tiih foreign key (user_id) references users
+2025-12-15T19:52:26.661-03:00  INFO 17016 --- [backend] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-12-15T19:52:28.059-03:00  WARN 17016 --- [backend] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-12-15T19:52:28.883-03:00  INFO 17016 --- [backend] [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@3a7f382, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@5a2297d7, org.springframework.security.web.context.SecurityContextHolderFilter@4ae435a3, org.springframework.security.web.header.HeaderWriterFilter@18c432ed, org.springframework.web.filter.CorsFilter@52e34db, org.springframework.security.web.authentication.logout.LogoutFilter@70ebaa1e, com.tiendamanga.security.JwtAuthenticationFilter@68722de3, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@6a9a6a0c, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@1cdb290c, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@39d37da8, org.springframework.security.web.session.SessionManagementFilter@4cff38ff, org.springframework.security.web.access.ExceptionTranslationFilter@25630ede, org.springframework.security.web.access.intercept.AuthorizationFilter@3a5c6009]
+2025-12-15T19:52:29.699-03:00  INFO 17016 --- [backend] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
+2025-12-15T19:52:29.720-03:00  INFO 17016 --- [backend] [           main] com.tiendamanga.Application              : Started Application in 10.17 seconds (process running for 10.784)
+2025-12-15T19:52:29.859-03:00  INFO 17016 --- [backend] [nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-12-15T19:52:29.860-03:00  INFO 17016 --- [backend] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-12-15T19:52:29.862-03:00  INFO 17016 --- [backend] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+Hibernate: select u1_0.id from users u1_0 where u1_0.username=? fetch first ? rows only
+Hibernate: insert into users (direccion,email,password,role,telefono,username,id) values (?,?,?,?,?,?,default)
+Usuario Admin creado: Admin / Admin123
+Hibernate: select u1_0.id from users u1_0 where u1_0.username=? fetch first ? rows only
+Hibernate: insert into users (direccion,email,password,role,telefono,username,id) values (?,?,?,?,?,?,default)
+Usuario Cliente creado: Cliente / Cliente
+2025-12-15T19:52:30.562-03:00  INFO 17016 --- [backend] [nio-8080-exec-2] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 594 ms
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  55:18 min
+[INFO] Finished at: 2025-12-15T20:47:32-03:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:3.2.3:run (default-cli) on project backend: Process terminated with exit code: -1 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

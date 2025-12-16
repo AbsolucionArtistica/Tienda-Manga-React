@@ -4,18 +4,19 @@ import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import { CarritoProvider } from './context/CarritoContext';
 import Checkout from './pages/Checkout';
+import Contacto from './pages/Contacto';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Perfil from './pages/Perfil';
 import Producto from './pages/Producto';
 
-import Tienda from './pages/Tienda';
-import MangaAdminList from './pages/admin/MangaAdminList';
-import MangaAdminForm from './pages/admin/MangaAdminForm';
-import './styles/main.css';
-import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext';
 import Register from './pages/Register';
+import Tienda from './pages/Tienda';
+import MangaAdminForm from './pages/admin/MangaAdminForm';
+import MangaAdminList from './pages/admin/MangaAdminList';
+import './styles/main.css';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             <Route path="/tienda" element={<Tienda />} />
             <Route path="/producto/:id" element={<Producto />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/contacto" element={<Contacto />} />
 
             <Route element={<ProtectedRoute role="ADMIN" />}>
               <Route path="/admin/mangas" element={<MangaAdminList />} />

@@ -1,58 +1,83 @@
-import React, { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { obtenerMangas, formatearPrecio } from '../data/mangas'
-import { obtenerMangaPorId } from '../services/animeapi'
-import { useCarrito } from '../context/CarritoContext'
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { useCarrito } from '../context/CarritoContext';
+import { formatearPrecio, obtenerMangas } from '../data/mangas';
+import { obtenerMangaPorId } from '../services/animeapi';
+import { getMangaById } from '../services/mangaService';
 
 const Producto = () => {
-  const { id } = useParams()
-  const [producto, setProducto] = useState(null)
-  const [cargando, setCargando] = useState(true)
-  const { agregarAlCarrito } = useCarrito()
+  const { id } = useParams();
+  const [producto, setProducto] = useState(null);
+  const [cargando, setCargando] = useState(true);
+  const { agregarAlCarrito } = useCarrito();
 
   useEffect(() => {
-    let mounted = true
+    let mounted = true;
 
     const cargar = async () => {
-      setCargando(true)
+      setCargando(true);
       try {
-        // Intentar obtener de la API primero
+        // 1) Intentar obtener del backend (mangas creados desde el panel admin)
         try {
-          const mangaAPI = await obtenerMangaPorId(id)
-          if (mangaAPI && mounted) {
-            setProducto(mangaAPI)
-            return
+          const mangaBackend = await getMangaById(id);
+          if (mangaBackend && mounted) {
+            setProducto({
+              id: mangaBackend.id,
+              nombre: mangaBackend.titulo,
+              autor: mangaBackend.autor,
+              editorial: mangaBackend.editorial,
+              precio: mangaBackend.precio,
+              stock: mangaBackend.stock,
+              descripcion: mangaBackend.editorial || 'Sin descripción',
+              imagen: mangaBackend.imagenUrl || 'https://via.placeholder.com/400x550?text=Manga',
+            });
+            return;
           }
-        } catch (errorAPI) {
-          console.warn('No se pudo obtener de la API, usando datos locales:', errorAPI)
+        } catch (errorBackend) {
+          console.warn('No se pudo obtener del backend, probando API:', errorBackend);
         }
 
-        // Fallback: obtener de datos locales
-        const listado = await obtenerMangas()
-        if (!mounted) return
-        const encontrado = listado.find(p => String(p.id) === String(id)) || null
-        setProducto(encontrado)
+        // 2) Intentar obtener de la API pública
+        try {
+          const mangaAPI = await obtenerMangaPorId(id);
+          if (mangaAPI && mounted) {
+            setProducto(mangaAPI);
+            return;
+          }
+        } catch (errorAPI) {
+          console.warn('No se pudo obtener de la API, usando datos locales:', errorAPI);
+        }
+
+        // 3) Fallback: obtener de datos locales
+        const listado = await obtenerMangas();
+        if (!mounted) return;
+        const encontrado = listado.find((p) => String(p.id) === String(id)) || null;
+        setProducto(encontrado);
       } catch (err) {
-        console.error('Error cargando mangas:', err)
-        if (mounted) setProducto(null)
+        console.error('Error cargando mangas:', err);
+        if (mounted) setProducto(null);
       } finally {
-        if (mounted) setCargando(false)
+        if (mounted) setCargando(false);
       }
-    }
+    };
 
-    cargar()
-    return () => { mounted = false }
-  }, [id])
+    cargar();
+    return () => {
+      mounted = false;
+    };
+  }, [id]);
 
-  if (cargando) return <div className="container py-5 text-center">Cargando...</div>
+  if (cargando) return <div className="container py-5 text-center">Cargando...</div>;
 
   if (!producto) {
     return (
       <div className="container py-5 text-center">
         <h3>Producto no encontrado</h3>
-        <Link to="/tienda" className="btn btn-primary mt-3">Volver a la tienda</Link>
+        <Link to="/tienda" className="btn btn-primary mt-3">
+          Volver a la tienda
+        </Link>
       </div>
-    )
+    );
   }
 
   return (
@@ -63,7 +88,9 @@ const Producto = () => {
             src={producto.imagen}
             alt={producto.nombre}
             className="img-fluid rounded shadow-sm"
-            onError={(e) => { e.target.src = 'https://via.placeholder.com/400x550?text=Manga' }}
+            onError={(e) => {
+              e.target.src = 'https://via.placeholder.com/400x550?text=Manga';
+            }}
           />
         </div>
         <div className="col-md-7">
@@ -80,12 +107,14 @@ const Producto = () => {
             >
               {producto.stock === 0 ? 'Agotado' : 'Agregar al carrito'}
             </button>
-            <Link to="/tienda" className="btn btn-outline-secondary">Volver</Link>
+            <Link to="/tienda" className="btn btn-outline-secondary">
+              Volver
+            </Link>
           </div>
         </div>
       </div>
     </main>
-  )
-}
+  );
+};
 
-export default Producto
+export default Producto;

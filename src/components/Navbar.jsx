@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
 
@@ -38,19 +38,28 @@ function Navbar() {
               </Link>
             </li>
             <li className="nav-item">
-              <Link className={`nav-link ${location.pathname === '/tienda' ? 'active' : ''}`} to="/tienda">
+              <Link
+                className={`nav-link ${location.pathname === '/tienda' ? 'active' : ''}`}
+                to="/tienda"
+              >
                 Tienda
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/contacto">
+              <Link
+                className={`nav-link ${location.pathname === '/contacto' ? 'active' : ''}`}
+                to="/contacto"
+              >
                 Contacto
               </Link>
             </li>
 
             {user && user.role === 'ADMIN' && (
               <li className="nav-item">
-                <Link className={`nav-link ${location.pathname.startsWith('/admin') ? 'active' : ''}`} to="/admin/mangas">
+                <Link
+                  className={`nav-link ${location.pathname.startsWith('/admin') ? 'active' : ''}`}
+                  to="/admin/mangas"
+                >
                   Admin
                 </Link>
               </li>
@@ -64,7 +73,10 @@ function Navbar() {
               >
                 <i className="fas fa-shopping-cart fa-lg"></i>
                 {cantidadTotal > 0 && (
-                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{fontSize: '0.6rem'}}>
+                  <span
+                    className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                    style={{ fontSize: '0.6rem' }}
+                  >
                     {cantidadTotal}
                   </span>
                 )}
@@ -83,13 +95,26 @@ function Navbar() {
                     <i className="fas fa-user-circle fa-lg"></i>
                   </button>
                   <ul className="dropdown-menu dropdown-menu-end">
-                    <li><Link className="dropdown-item fw-bold" to="/perfil">Hola, {user.username}</Link></li>
-                    <li><hr className="dropdown-divider" /></li>
-                    <li><button className="dropdown-item" onClick={handleLogout}>Cerrar Sesión</button></li>
+                    <li>
+                      <Link className="dropdown-item fw-bold" to="/perfil">
+                        Hola, {user.username}
+                      </Link>
+                    </li>
+                    <li>
+                      <hr className="dropdown-divider" />
+                    </li>
+                    <li>
+                      <button className="dropdown-item" onClick={handleLogout}>
+                        Cerrar Sesión
+                      </button>
+                    </li>
                   </ul>
                 </div>
               ) : (
-                <Link className={`nav-link ${location.pathname === '/login' ? 'active' : ''}`} to="/login">
+                <Link
+                  className={`nav-link ${location.pathname === '/login' ? 'active' : ''}`}
+                  to="/login"
+                >
                   <i className="fas fa-user-circle fa-lg"></i>
                 </Link>
               )}

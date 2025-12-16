@@ -1,34 +1,36 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { getMyOrders } from '../services/orderService';
 
 function Perfil() {
   const [usuarioActivo, setUsuarioActivo] = useState(null);
   const [alertasPerfil, setAlertasPerfil] = useState([]);
   const [pedidos, setPedidos] = useState([]);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const datosGuardados = localStorage.getItem('usuarioActivo');
+    const datosGuardados =
+      user ||
+      JSON.parse(localStorage.getItem('user') || 'null') ||
+      JSON.parse(localStorage.getItem('usuarioActivo') || 'null');
     if (datosGuardados) {
       try {
-        const usuario = JSON.parse(datosGuardados);
-        setUsuarioActivo(usuario);
+        setUsuarioActivo(datosGuardados);
         const alertas = [];
-        if (!usuario.telefono) {
+        if (!datosGuardados.telefono) {
           alertas.push('Agrega un teléfono de contacto para coordinar entregas express.');
         }
-        if (!usuario.direccion) {
-            alertas.push('Verifica tu dirección de despacho.');
+        if (!datosGuardados.direccion) {
+          alertas.push('Verifica tu dirección de despacho.');
         }
         setAlertasPerfil(alertas);
 
-        // Fetch orders
-        if (usuario.token) {
-            getMyOrders(usuario.token)
-                .then(data => setPedidos(data))
-                .catch(err => console.error("Error fetching orders:", err));
+        if (datosGuardados.token) {
+          getMyOrders(datosGuardados.token)
+            .then((data) => setPedidos(data))
+            .catch((err) => console.error('Error fetching orders:', err));
         }
-
       } catch (error) {
         console.error('No fue posible leer los datos del usuario activo:', error);
         setUsuarioActivo(null);
@@ -39,7 +41,7 @@ function Perfil() {
     } else {
       setAlertasPerfil([]);
     }
-  }, []);
+  }, [user]);
 
   return (
     <section className="perfil-page py-5 bg-light">
@@ -68,49 +70,50 @@ function Perfil() {
                   <div className="vstack gap-3">
                     <div>
                       <h2 className="h6 text-uppercase text-secondary mb-1">Datos personales</h2>
-                      <p className="mb-0 fw-semibold">{usuarioActivo.username}</p>
+                      <p className="mb-0 fw-semibold">
+                        {usuarioActivo.username || usuarioActivo.nombre}
+                      </p>
                       <p className="mb-0 text-muted">{usuarioActivo.email}</p>
                     </div>
                     <div>
                       <h2 className="h6 text-uppercase text-secondary mb-1">Contacto</h2>
-                      <p className="mb-0">
-                        Teléfono: {usuarioActivo.telefono || 'No registrado'}
-                      </p>
+                      <p className="mb-0">Teléfono: {usuarioActivo.telefono || 'No registrado'}</p>
                       <p className="mb-0 text-muted">
-                        Dirección: {usuarioActivo.direccion || 'No registrada'}
+                        Dirección:{' '}
+                        {usuarioActivo.direccion || usuarioActivo.ciudad || 'No registrada'}
                       </p>
                     </div>
 
                     <hr />
 
                     <div>
-                        <h2 className="h6 text-uppercase text-secondary mb-3">Mis Pedidos</h2>
-                        {pedidos.length > 0 ? (
-                            <div className="table-responsive">
-                                <table className="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Fecha</th>
-                                            <th>Total</th>
-                                            <th>Items</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {pedidos.map(pedido => (
-                                            <tr key={pedido.id}>
-                                                <td>#{pedido.id}</td>
-                                                <td>{new Date(pedido.fecha).toLocaleDateString()}</td>
-                                                <td>${pedido.total}</td>
-                                                <td>{pedido.mangas ? pedido.mangas.length : 0}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        ) : (
-                            <p className="text-muted">No has realizado pedidos aún.</p>
-                        )}
+                      <h2 className="h6 text-uppercase text-secondary mb-3">Mis Pedidos</h2>
+                      {pedidos.length > 0 ? (
+                        <div className="table-responsive">
+                          <table className="table table-hover">
+                            <thead>
+                              <tr>
+                                <th>ID</th>
+                                <th>Fecha</th>
+                                <th>Total</th>
+                                <th>Items</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {pedidos.map((pedido) => (
+                                <tr key={pedido.id}>
+                                  <td>#{pedido.id}</td>
+                                  <td>{new Date(pedido.fecha).toLocaleDateString()}</td>
+                                  <td>${pedido.total}</td>
+                                  <td>{pedido.mangas ? pedido.mangas.length : 0}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <p className="text-muted">No has realizado pedidos aún.</p>
+                      )}
                     </div>
                   </div>
                 ) : (
